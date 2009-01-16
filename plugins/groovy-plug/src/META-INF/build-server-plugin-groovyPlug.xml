@@ -1,0 +1,20 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns="http://www.springframework.org/schema/beans"
+       xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+       xmlns:lang="http://www.springframework.org/schema/lang"
+       xsi:schemaLocation="http://www.springframework.org/schema/beans
+                           http://www.springframework.org/schema/beans/spring-beans-2.0.xsd
+                           http://www.springframework.org/schema/lang
+                           http://www.springframework.org/schema/lang/spring-lang-2.0.xsd"
+       default-autowire="constructor">
+<!-- you may also use "file://" URL in script-source attribute -->    
+    <lang:groovy id="groovyPropertyProvider" refresh-check-delay="5000"
+                 script-source="classpath:jetbrains/buildserver/groovyPlug/GroovyPropertyProvider.groovy">
+        <lang:property name="vcsModificationHistory" ref="dbVcsModificationHistory"/>
+    </lang:groovy>
+    
+    <bean id="groovyPropertyProviderInitializer" class="jetbrains.buildserver.groovyPlug.GroovyPropertyProviderInitializer">
+        <constructor-arg index="0" ref="groovyPropertyProvider"/>
+        <constructor-arg index="1" ref="buildServer"/>
+    </bean>
+</beans>

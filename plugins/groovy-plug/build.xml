@@ -1,0 +1,82 @@
+<project name="groovyplug-custom-build" default="dist" basedir=".">
+
+    <property file="build.properties"/>
+
+    <import file="groovyplug.xml"/>
+
+    <property name="plugin_name" value="groovyPlug"/>
+
+    <property name="dist" value="dist"/>
+    <property name="distrib_prep" value="${basedir}/temp/dist_prep"/>
+
+    <target name="build.jar" depends="all">
+        <delete file="${dist}/${plugin_name}.jar" quiet="true"/>
+        <delete dir="${distrib_prep}" quiet="true"/>
+
+        <mkdir dir="${distrib_prep}"/>
+        <mkdir dir="${dist}"/>
+
+        <copydir src="${groovyplug.output.dir}" dest="${distrib_prep}"/>
+        <copydir src="${basedir}/buildServerResources" dest="${distrib_prep}/buildServerResources"/>
+
+        <jar destfile="${dist}/${plugin_name}.jar">
+            <fileset dir="${distrib_prep}"/>
+        </jar>
+        <delete dir="${distrib_prep}" quiet="true"/>
+    </target>
+
+    <target name="package" depends="check, build.jar">
+        <delete file="${dist}/${plugin_name}.zip" quiet="true"/>
+        <zip destfile="${dist}/${plugin_name}.zip">
+            <fileset dir="${dist}" includes="*.jar"/>
+            <!--<fileset dir="lib" excludes="**/.svn/**"/>-->
+        </zip>
+        <echo message="To install the plugin, place '${dist}\${plugin_name}.zip' into '.BuildServer/plugins' directory"/>
+        <!-- Groovy specific -->
+        <copy todir="${dist}/application_libs">
+            <fileset dir="lib" excludes="**/.svn/**"/>
+        </copy>
+        <echo message="also, copy files from 'application_libs' into '&lt;TeamCity home&gt;/webapps/ROOT/WEB-INF/lib' directory"/>
+    </target>
+
+    <target name="dist" depends="check,all,package"/>
+
+    <target name="check">
+        <condition property="not.configured">
+            <not>
+                <and>
+                    <isset property="path.variable.teamcitydistribution"/>
+                    <length string="${path.variable.teamcitydistribution}" when="greater" length="0"/>
+                    <available file="${path.variable.teamcitydistribution}/webapps/ROOT/WEB-INF/lib"/>
+                </and>
+            </not>
+        </condition>
+        <fail if="not.configured"
+              message="Please define 'path.variable.teamcitydistribution' property in build.properties file. The property should point to unpacked TeamCity .tar.gz or .exe distribution."/>
+    </target>
+
+    <!-- TeamCity distribution unpacking -->
+    <target name="teamcity_unpack">
+
+        <property name="distribution.dir" value="${basedir}/teamcity-dist"/>
+        <property name="teamcity.tar.gz-location" value="."/>
+
+        <delete dir="${distribution.dir}" quiet="true"/>
+        <mkdir dir="${distribution.dir}"/>
+
+        <untar compression="gzip" dest="${distribution.dir}">
+            <fileset dir="${teamcity.tar.gz-location}">
+                <include name="*.tar.gz"/>
+            </fileset>
+        </untar>
+
+        <move todir="${distribution.dir}">
+            <fileset dir="${distribution.dir}\TeamCity">
+                <include name="**"/>
+            </fileset>
+        </move>
+    </target>
+
+</project>
+
+        
