@@ -11,10 +11,6 @@
     <lang:groovy id="groovyPropertyProvider" refresh-check-delay="5000"
                  script-source="classpath:jetbrains/buildserver/groovyPlug/GroovyPropertyProvider.groovy">
         <lang:property name="vcsModificationHistory" ref="dbVcsModificationHistory"/>
+        <lang:property name="extensionHolder" ref="buildServer"/>
     </lang:groovy>
-    
-    <bean id="groovyPropertyProviderInitializer" class="jetbrains.buildserver.groovyPlug.GroovyPropertyProviderInitializer">
-        <constructor-arg index="0" ref="groovyPropertyProvider"/>
-        <constructor-arg index="1" ref="buildServer"/>
-    </bean>
 </beans>

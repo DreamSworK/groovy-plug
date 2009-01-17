@@ -22,20 +22,22 @@ import java.util.Map.Entry
 import jetbrains.buildServer.serverSide.ParametersPreprocessor
 import jetbrains.buildServer.serverSide.SBuild
 import jetbrains.buildServer.serverSide.SRunningBuild
+import jetbrains.buildServer.serverSide.ServerExtensionHolder
 import jetbrains.buildServer.vcs.SVcsModification
 import jetbrains.buildServer.vcs.VcsModificationHistory
-import jetbrains.buildserver.groovyPlug.GroovyPropertyProvider
 import org.jetbrains.annotations.Nullable
+import org.springframework.beans.factory.InitializingBean
 
 /**
  * @author Yegor.Yarko
  * Date: 15.01.2009
  */
 
-public class GroovyPropertyProvider implements ParametersPreprocessor {
+public class GroovyPropertyProvider implements ParametersPreprocessor, InitializingBean {
   private static final Logger LOG = Logger.getInstance(GroovyPropertyProvider.class.getName());
 
   VcsModificationHistory vcsModificationHistory;
+  ServerExtensionHolder extensionHolder;
 
   GroovyPropertyProvider() {
     LOG.info("GroovyPropertyProvider initialized.");
@@ -78,4 +80,7 @@ public class GroovyPropertyProvider implements ParametersPreprocessor {
     }
   }
 
+  public void afterPropertiesSet() {
+    extensionHolder.registerExtension(ParametersPreprocessor.class, "myPropertyProvider", this);
+  }
 }
