@@ -17,7 +17,9 @@
         <mkdir dir="${dist}"/>
 
         <copydir src="${groovyplug.output.dir}" dest="${distrib_prep}"/>
-        <copydir src="${basedir}/buildServerResources" dest="${distrib_prep}/buildServerResources"/>
+        <copy todir="${distrib_prep}/buildServerResources" failonerror="false">
+          <fileset dir="${basedir}/buildServerResources"/>
+        </copy>
 
         <jar destfile="${dist}/${plugin_name}.jar">
             <fileset dir="${distrib_prep}"/>

@@ -26,14 +26,13 @@ import jetbrains.buildServer.serverSide.ServerExtensionHolder
 import jetbrains.buildServer.vcs.SVcsModification
 import jetbrains.buildServer.vcs.VcsModificationHistory
 import org.jetbrains.annotations.Nullable
-import org.springframework.beans.factory.InitializingBean
 
 /**
  * @author Yegor.Yarko
  * Date: 15.01.2009
  */
 
-public class GroovyPropertyProvider implements ParametersPreprocessor, InitializingBean {
+public class GroovyPropertyProvider implements ParametersPreprocessor{
   private static final Logger LOG = Logger.getInstance(GroovyPropertyProvider.class.getName());
 
   VcsModificationHistory vcsModificationHistory;
@@ -78,9 +77,5 @@ public class GroovyPropertyProvider implements ParametersPreprocessor, Initializ
       buildParametersToAdd.put("system.build.lastChange.time", formattedDate);
       buildParametersToAdd.put("env.BUILD_VCS_LASTCHANGE_TIMESTAMP", formattedDate);
     }
-  }
-
-  public void afterPropertiesSet() {
-    extensionHolder.registerExtension(ParametersPreprocessor.class, "myPropertyProvider", this);
   }
 }
