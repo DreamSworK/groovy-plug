@@ -32,7 +32,7 @@ import org.jetbrains.annotations.Nullable
  * Date: 15.01.2009
  */
 
-public class GroovyPropertyProvider implements ParametersPreprocessor{
+public class GroovyPropertyProvider implements ParametersPreprocessor {
   private static final Logger LOG = Logger.getInstance(GroovyPropertyProvider.class.getName());
 
   VcsModificationHistory vcsModificationHistory;
@@ -47,6 +47,7 @@ public class GroovyPropertyProvider implements ParametersPreprocessor{
     Map<String, String> buildParamsToAdd = new HashMap<String, String>();
 
     addLastModification(buildParamsToAdd, build);
+    addBuildStartTime(buildParamsToAdd, build);
 
     addBuildParameters(buildParamsToAdd, buildParams)
   }
@@ -69,13 +70,23 @@ public class GroovyPropertyProvider implements ParametersPreprocessor{
     return vcsModificationHistory.findChangeById(modificationId);
   }
 
-  void addLastModification(java.util.Map<java.lang.String, java.lang.String> buildParametersToAdd, SRunningBuild build) {
+  void addLastModification(Map<java.lang.String, java.lang.String> buildParametersToAdd, SRunningBuild build) {
     SVcsModification lastModification = getLastModification(build);
     if (lastModification != null) {
       Date lastChangeDate = lastModification.getVcsDate();
-      String formattedDate = (new SimpleDateFormat("yyyyMMdd'T'HHmmssZ")).format(lastChangeDate);
-      buildParametersToAdd.put("system.build.lastChange.time", formattedDate);
-      buildParametersToAdd.put("env.BUILD_VCS_LASTCHANGE_TIMESTAMP", formattedDate);
+      addDateTimeProperty(buildParametersToAdd, lastChangeDate, "yyyyMMdd'T'HHmmssZ", "build.lastChange.time", "BUILD_VCS_LASTCHANGE_TIMESTAMP");
     }
+  }
+
+  void addBuildStartTime(Map<java.lang.String, java.lang.String> buildParametersToAdd, SRunningBuild build) {
+    Date buildStartTime = build.getStartDate();
+    addDateTimeProperty(buildParametersToAdd, buildStartTime, "yyyyMMdd", "build.start.date", "BUILD_START_DATE");
+    addDateTimeProperty(buildParametersToAdd, buildStartTime, "HHmmss", "build.start.time", "BUILD_START_TIME");
+  }
+
+  private def addDateTimeProperty(Map<String, String> buildParametersToAdd, Date date, String dateFormat, String systemParamName, String envParamName) {
+    String formattedDate = (new SimpleDateFormat(dateFormat)).format(date);
+    if (systemParamName != null) buildParametersToAdd.put("system." + systemParamName, formattedDate);
+    if (envParamName != null) buildParametersToAdd.put("env." + envParamName, formattedDate)
   }
 }

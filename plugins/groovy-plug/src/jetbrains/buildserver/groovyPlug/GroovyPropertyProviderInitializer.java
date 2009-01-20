@@ -25,9 +25,18 @@ import jetbrains.buildServer.serverSide.ServerExtensionHolder;
  */
 
 public class GroovyPropertyProviderInitializer {
+  ParametersPreprocessor myPropertyProvider;
+  private ServerExtensionHolder myExtensionsHolder;
 
-  public GroovyPropertyProviderInitializer(ParametersPreprocessor myPropertyProvider, ServerExtensionHolder myExtensionsHolder) {
-    myExtensionsHolder.registerExtension(ParametersPreprocessor.class, "myPropertyProvider", myPropertyProvider);
+  public GroovyPropertyProviderInitializer(ServerExtensionHolder extensionHolder) {
+    this.myExtensionsHolder = extensionHolder;
   }
 
+  public void setPropertyProvider(ParametersPreprocessor myPropertyProvider) {
+    this.myPropertyProvider = myPropertyProvider;
+  }
+
+  public void init(){
+    myExtensionsHolder.registerExtension(ParametersPreprocessor.class, "myPropertyProvider", myPropertyProvider);
+  }
 }

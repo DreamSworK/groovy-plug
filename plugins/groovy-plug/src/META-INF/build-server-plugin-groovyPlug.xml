@@ -8,30 +8,30 @@
                            http://www.springframework.org/schema/lang/spring-lang-2.0.xsd"
        default-autowire="constructor">
 
-    <bean id="customProps" class="jetbrains.buildserver.groovyPlug.CustomSubstitutionProperties">
-        <property name="groovyPlugScriptsDirPropertyName" value="groovyplug.dir"/>
-        <property name="groovyPlugScriptsDir" value="__groovyPlug__"/>
-    </bean>
+  <bean id="scriptPreparer" class="jetbrains.buildserver.groovyPlug.GroovyScriptsPreparer" init-method="init">
+    <property name="sourceResourceDir" value="/jetbrains/buildserver/groovyPlug"/>
+    <property name="sourceFileName" value="GroovyPropertyProvider.groovy"/>
+    <property name="targetDirUnderConfig" value="__groovyPlug__"/>
+    <property name="targetFileName" value="GroovyPropertyProvider.groovy"/>
+  </bean>
 
-    <bean class="jetbrains.buildserver.groovyPlug.GroovyScriptsPreparer">
-        <property name="mySourceResourceDir" value="/jetbrains/buildserver/groovyPlug"/>
-        <property name="mySourceFileName" value="GroovyPropertyProvider.groovy"/>
-        <property name="myTargetDir" value="${groovyplug.dir}"/>
-        <property name="myTargetFileName" value="GroovyPropertyProvider.groovy"/>
-    </bean>
+  <!-- Dependency on scriptPreparer is needed to ensure it is initialized before groovy bean definition tries to be parsed -->
+  <bean id="customProps" class="jetbrains.buildserver.groovyPlug.CustomSubstitutionProperties" depends-on="scriptPreparer">
+    <property name="groovyPlugScriptsDirPropertyName" value="groovyplug.dir"/>
+    <property name="groovyPlugScriptsDir" value="__groovyPlug__"/>
+  </bean>
 
-    <bean class="org.springframework.beans.factory.config.PropertyPlaceholderConfigurer">
-        <property name="properties" ref="customProps"/>
-    </bean>
+  <bean class="org.springframework.beans.factory.config.PropertyPlaceholderConfigurer">
+    <property name="properties" ref="customProps"/>
+  </bean>
 
-    <lang:groovy id="groovyPropertyProvider" refresh-check-delay="5000"
-                 script-source="file:/${groovyplug.dir}/GroovyPropertyProvider.groovy">
-        <lang:property name="vcsModificationHistory" ref="dbVcsModificationHistory"/>
-    </lang:groovy>
+  <bean class="jetbrains.buildserver.groovyPlug.GroovyPropertyProviderInitializer" init-method="init">
+    <property name="propertyProvider" ref="groovyPropertyProvider"/>
+  </bean>
 
-    <bean class="jetbrains.buildserver.groovyPlug.GroovyPropertyProviderInitializer">
-        <constructor-arg index="0" ref="groovyPropertyProvider"/>
-        <constructor-arg index="1" ref="buildServer"/>
-    </bean>
+  <lang:groovy id="groovyPropertyProvider" refresh-check-delay="5000"
+               script-source="file:/${groovyplug.dir}/GroovyPropertyProvider.groovy">
+    <lang:property name="vcsModificationHistory" ref="dbVcsModificationHistory"/>
+  </lang:groovy>
 
 </beans>

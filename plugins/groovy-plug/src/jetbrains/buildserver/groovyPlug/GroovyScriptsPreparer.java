@@ -18,7 +18,7 @@ package jetbrains.buildserver.groovyPlug;
 
 import com.intellij.openapi.diagnostic.Logger;
 import jetbrains.buildServer.util.FileUtil;
-import org.springframework.beans.factory.InitializingBean;
+import jetbrains.buildServer.serverSide.ServerPaths;
 
 import java.io.File;
 
@@ -26,52 +26,42 @@ import java.io.File;
  * @author Yegor.Yarko
  *         Date: 19.01.2009
  */
-public class GroovyScriptsPreparer implements InitializingBean {
+public class GroovyScriptsPreparer {
   private static final Logger LOG = Logger.getInstance(GroovyScriptsPreparer.class.getName());
 
+  private ServerPaths myServerPaths;
   private String mySourceResourceDir;
-  private String myTargetDir;
+  private String myTargetDirUnderConfig;
   private String mySourceFileName;
   private String myTargetFileName;
 
-  public void afterPropertiesSet() throws Exception {
-    final File targetFile = new File(myTargetDir, myTargetFileName);
+  public GroovyScriptsPreparer(ServerPaths serverPaths) {
+    myServerPaths = serverPaths;
+  }
+
+  public void init() {
+    final String targetDir = new File(myServerPaths.getConfigDir(), myTargetDirUnderConfig).getAbsolutePath();
+    final File targetFile = new File(targetDir, myTargetFileName);
     if (!targetFile.exists()) {
-      new File(myTargetDir).mkdirs();
+      new File(targetDir).mkdirs();
       FileUtil.copyResource(getClass(), mySourceResourceDir + "/" + mySourceFileName, targetFile);
       LOG.info("Created default script: " + targetFile.getAbsolutePath());
     }
   }
 
-  public void setMySourceResourceDir(String mySourceFileInResources) {
+  public void setSourceResourceDir(String mySourceFileInResources) {
     this.mySourceResourceDir = mySourceFileInResources;
   }
 
-  public String getMySourceResourceDir() {
-    return mySourceResourceDir;
+  public void setTargetDirUnderConfig(String myTargetDirUnderConfig) {
+    this.myTargetDirUnderConfig = myTargetDirUnderConfig;
   }
 
-  public void setMyTargetDir(String myTargetDir) {
-    this.myTargetDir = myTargetDir;
-  }
-
-  public String getMyTargetDir() {
-    return myTargetDir;
-  }
-
-  public void setMySourceFileName(String mySourceFileName) {
+  public void setSourceFileName(String mySourceFileName) {
     this.mySourceFileName = mySourceFileName;
   }
 
-  public String getMySourceFileName() {
-    return mySourceFileName;
-  }
-
-  public void setMyTargetFileName(String myTargetFileName) {
+  public void setTargetFileName(String myTargetFileName) {
     this.myTargetFileName = myTargetFileName;
-  }
-
-  public String getMyTargetFileName() {
-    return myTargetFileName;
   }
 }
