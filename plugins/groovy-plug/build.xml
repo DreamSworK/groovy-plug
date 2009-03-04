@@ -35,14 +35,17 @@
         </zip>
         <echo message="To install the plugin, place '${dist}\${plugin_name}.zip' into '.BuildServer/plugins' directory"/>
         <!-- Groovy specific -->
+        <delete dir="${dist}/application_libs" quiet="true"/>
         <copy todir="${dist}/application_libs">
-            <fileset dir="lib" excludes="**/.svn/**"/>
+            <fileset dir="lib" excludes="**/.svn/**,commons-cli-1.0.jar"/>
         </copy>
         <echo message="also, copy files from 'application_libs' into '&lt;TeamCity home&gt;/webapps/ROOT/WEB-INF/lib' directory"/>
     </target>
 
     <target name="dist" depends="check,all,package"/>
 
+    <target name="clean" depends="groovyplug.clean" />
+    
     <target name="check">
         <condition property="not.configured">
             <not>

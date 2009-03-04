@@ -59,6 +59,7 @@
   <path id="library.groovy.classpath">
     <pathelement location="${basedir}/lib/antlr-2.7.6.jar"/>
     <pathelement location="${basedir}/lib/asm-2.2.jar"/>
+    <pathelement location="${basedir}/lib/commons-cli-1.0.jar"/>
     <pathelement location="${basedir}/lib/groovy-1.5.6.jar"/>
   </path>
   
