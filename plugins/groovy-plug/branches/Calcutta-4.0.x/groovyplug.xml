@@ -1,0 +1,175 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project name="groovyplug" default="all">
+  
+  
+  <property file="groovyplug.properties"/>
+  <!-- Uncomment the following property if no tests compilation is needed -->
+  <!-- 
+  <property name="skip.tests" value="true"/>
+   -->
+  
+  <!-- Compiler options -->
+  
+  <property name="compiler.debug" value="on"/>
+  <property name="compiler.generate.no.warnings" value="off"/>
+  <property name="compiler.args" value=""/>
+  <property name="compiler.max.memory" value="128m"/>
+  <patternset id="ignored.files">
+    <exclude name="**/CVS/**"/>
+    <exclude name="**/SCCS/**"/>
+    <exclude name="**/RCS/**"/>
+    <exclude name="**/rcs/**"/>
+    <exclude name="**/.DS_Store/**"/>
+    <exclude name="**/.svn/**"/>
+    <exclude name="**/.sbas/**"/>
+    <exclude name="**/.IJI.*/**"/>
+    <exclude name="**/vssver.scc/**"/>
+    <exclude name="**/vssver2.scc/**"/>
+    <exclude name="**/.pyc/**"/>
+    <exclude name="**/.pyo/**"/>
+    <exclude name="**/*.pyc/**"/>
+    <exclude name="**/*.pyo/**"/>
+    <exclude name="**/.git/**"/>
+  </patternset>
+  <patternset id="library.patterns">
+    <include name="*.zip"/>
+    <include name="*.war"/>
+    <include name="*.egg"/>
+    <include name="*.ear"/>
+    <include name="*.swc"/>
+    <include name="*.jar"/>
+  </patternset>
+  <patternset id="compiler.resources">
+    <include name="**/?*.properties"/>
+    <include name="**/?*.xml"/>
+    <include name="**/?*.gif"/>
+    <include name="**/?*.png"/>
+    <include name="**/?*.jpeg"/>
+    <include name="**/?*.jpg"/>
+    <include name="**/?*.html"/>
+    <include name="**/?*.dtd"/>
+    <include name="**/?*.tld"/>
+    <include name="**/?*.ftl"/>
+    <include name="**/?*.groovy"/>
+  </patternset>
+  
+  
+  <!-- Project Libraries -->
+  
+  <path id="library.groovy.classpath">
+    <pathelement location="${basedir}/lib/antlr-2.7.6.jar"/>
+    <pathelement location="${basedir}/lib/asm-2.2.jar"/>
+    <pathelement location="${basedir}/lib/commons-cli-1.0.jar"/>
+    <pathelement location="${basedir}/lib/groovy-1.5.6.jar"/>
+  </path>
+  
+  <path id="library.teamcity_open_api_common.classpath">
+    <pathelement location="${path.variable.teamcitydistribution}/devPackage/common-api.jar"/>
+    <pathelement location="${path.variable.teamcitydistribution}/devPackage/runtime-util.jar"/>
+  </path>
+  
+  <path id="library.teamcity_open_api_server.classpath">
+    <pathelement location="${path.variable.teamcitydistribution}/devPackage/server-api.jar"/>
+  </path>
+  
+  <path id="library.teamcity_third-party.classpath">
+    <pathelement location="${path.variable.teamcitydistribution}/webapps/ROOT/WEB-INF/lib/annotations.jar"/>
+    <pathelement location="${path.variable.teamcitydistribution}/webapps/ROOT/WEB-INF/lib/openapi.jar"/>
+    <pathelement location="${path.variable.teamcitydistribution}/webapps/ROOT/WEB-INF/lib/spring-webmvc.jar"/>
+    <pathelement location="${path.variable.teamcitydistribution}/webapps/ROOT/WEB-INF/lib/spring.jar"/>
+    <pathelement location="${path.variable.teamcitydistribution}/webapps/ROOT/WEB-INF/lib/util.jar"/>
+  </path>
+  
+  
+  <!-- Application Server Libraries -->
+  
+  <!-- Custom Compiler Taskdefs -->
+  <property name="grooovyc.task.sdk" value="library.groovy.classpath"/>
+  <taskdef name="groovyc" classname="org.codehaus.groovy.ant.Groovyc" classpathref="${grooovyc.task.sdk}"/>
+  
+  <!-- Modules -->
+  
+  
+  <!-- Module GroovyPlug -->
+  
+  <dirname property="module.groovyplug.basedir" file="${ant.file}"/>
+  
+  
+  
+  <property name="compiler.args.groovyplug" value="${compiler.args}"/>
+  
+  <property name="groovyplug.output.dir" value="${module.groovyplug.basedir}/out/production/GroovyPlug"/>
+  <property name="groovyplug.testoutput.dir" value="${module.groovyplug.basedir}/out/test/GroovyPlug"/>
+  
+  <path id="groovyplug.module.bootclasspath">
+    <!-- Paths to be included in compilation bootclasspath -->
+  </path>
+  
+  <path id="groovyplug.module.classpath">
+    <path refid="library.groovy.classpath"/>
+    <path refid="library.teamcity_open_api_server.classpath"/>
+    <path refid="library.teamcity_open_api_common.classpath"/>
+    <path refid="library.teamcity_third-party.classpath"/>
+  </path>
+  
+  <path id="groovyplug.runtime.module.classpath">
+    <path refid="library.groovy.classpath"/>
+    <pathelement location="${groovyplug.output.dir}"/>
+    <pathelement location="${groovyplug.testoutput.dir}"/>
+    <path refid="library.teamcity_open_api_server.classpath"/>
+    <path refid="library.teamcity_open_api_common.classpath"/>
+    <path refid="library.teamcity_third-party.classpath"/>
+  </path>
+  
+  
+  <patternset id="excluded.from.module.groovyplug">
+    <patternset refid="ignored.files"/>
+  </patternset>
+  
+  <patternset id="excluded.from.compilation.groovyplug">
+    <patternset refid="excluded.from.module.groovyplug"/>
+  </patternset>
+  
+  <path id="groovyplug.module.sourcepath">
+    <dirset dir="${module.groovyplug.basedir}">
+      <include name="src"/>
+    </dirset>
+  </path>
+  
+  
+  <target name="compile.module.groovyplug" depends="compile.module.groovyplug.production,compile.module.groovyplug.tests" description="Compile module GroovyPlug"/>
+  
+  <target name="compile.module.groovyplug.production" description="Compile module GroovyPlug; production classes">
+    <mkdir dir="${groovyplug.output.dir}"/>
+    <groovyc destdir="${groovyplug.output.dir}" fork="yes">
+      <src refid="groovyplug.module.sourcepath"/>
+      <classpath refid="groovyplug.module.classpath"/>
+      <patternset refid="excluded.from.compilation.groovyplug"/>
+      <javac debug="${compiler.debug}">
+        <compilerarg line="${compiler.args.groovyplug}"/>
+      </javac>
+    </groovyc>
+    
+    <copy todir="${groovyplug.output.dir}">
+      <fileset dir="${module.groovyplug.basedir}/src">
+        <patternset refid="compiler.resources"/>
+        <type type="file"/>
+      </fileset>
+    </copy>
+  </target>
+  
+  <target name="compile.module.groovyplug.tests" depends="compile.module.groovyplug.production" description="compile module GroovyPlug; test classes" unless="skip.tests"/>
+  
+  <target name="clean.module.groovyplug" description="cleanup module">
+    <delete dir="${groovyplug.output.dir}"/>
+    <delete dir="${groovyplug.testoutput.dir}"/>
+  </target>
+  
+  <target name="init" description="Build initialization">
+    <!-- Perform any build initialization in this target -->
+  </target>
+  
+  <target name="clean" depends="clean.module.groovyplug" description="cleanup all"/>
+  
+  <target name="all" depends="init, clean, compile.module.groovyplug" description="build all"/>
+</project>
