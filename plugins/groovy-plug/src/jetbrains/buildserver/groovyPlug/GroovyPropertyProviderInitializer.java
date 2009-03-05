@@ -18,6 +18,7 @@ package jetbrains.buildserver.groovyPlug;
 
 import jetbrains.buildServer.serverSide.ParametersPreprocessor;
 import jetbrains.buildServer.serverSide.ServerExtensionHolder;
+import jetbrains.buildServer.serverSide.parameters.BuildParameterReferencesProvider;
 
 /**
  * @author Yegor.Yarko
@@ -26,6 +27,7 @@ import jetbrains.buildServer.serverSide.ServerExtensionHolder;
 
 public class GroovyPropertyProviderInitializer {
   ParametersPreprocessor myPropertyProvider;
+  BuildParameterReferencesProvider myReferencePropertyProvider;
   private ServerExtensionHolder myExtensionsHolder;
 
   public GroovyPropertyProviderInitializer(ServerExtensionHolder extensionHolder) {
@@ -36,7 +38,12 @@ public class GroovyPropertyProviderInitializer {
     this.myPropertyProvider = myPropertyProvider;
   }
 
+  public void setReferencePropertyProvider(BuildParameterReferencesProvider referencePropertyProvider) {
+    this.myReferencePropertyProvider = referencePropertyProvider;
+  }
+
   public void init(){
     myExtensionsHolder.registerExtension(ParametersPreprocessor.class, "myPropertyProvider", myPropertyProvider);
+    myExtensionsHolder.registerExtension(BuildParameterReferencesProvider.class, "myReferencePropertyProvider", myReferencePropertyProvider);
   }
 }

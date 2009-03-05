@@ -32,8 +32,7 @@ public class GroovyScriptsPreparer {
   private ServerPaths myServerPaths;
   private String mySourceResourceDir;
   private String myTargetDirUnderConfig;
-  private String mySourceFileName;
-  private String myTargetFileName;
+  private String[] myFileNames;
 
   public GroovyScriptsPreparer(ServerPaths serverPaths) {
     myServerPaths = serverPaths;
@@ -41,10 +40,16 @@ public class GroovyScriptsPreparer {
 
   public void init() {
     final String targetDir = new File(myServerPaths.getConfigDir(), myTargetDirUnderConfig).getAbsolutePath();
-    final File targetFile = new File(targetDir, myTargetFileName);
+    new File(targetDir).mkdirs();
+    for (String fileName : myFileNames) {
+      copyResource(mySourceResourceDir, targetDir, fileName);
+    }
+  }
+
+  private void copyResource(String sourceDir, String targetDir, String fileName) {
+    final File targetFile = new File(targetDir, fileName);
     if (!targetFile.exists()) {
-      new File(targetDir).mkdirs();
-      FileUtil.copyResource(getClass(), mySourceResourceDir + "/" + mySourceFileName, targetFile);
+      FileUtil.copyResource(getClass(), sourceDir + "/" + fileName, targetFile);
       LOG.info("Created default script: " + targetFile.getAbsolutePath());
     }
   }
@@ -57,11 +62,7 @@ public class GroovyScriptsPreparer {
     this.myTargetDirUnderConfig = myTargetDirUnderConfig;
   }
 
-  public void setSourceFileName(String mySourceFileName) {
-    this.mySourceFileName = mySourceFileName;
-  }
-
-  public void setTargetFileName(String myTargetFileName) {
-    this.myTargetFileName = myTargetFileName;
+  public void setFileNames(String[] fileNames) {
+    this.myFileNames = fileNames;
   }
 }
