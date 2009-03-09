@@ -49,8 +49,13 @@ public class GroovyScriptsPreparer {
   private void copyResource(String sourceDir, String targetDir, String fileName) {
     final File targetFile = new File(targetDir, fileName);
     if (!targetFile.exists()) {
-      FileUtil.copyResource(getClass(), sourceDir + "/" + fileName, targetFile);
-      LOG.info("Created default script: " + targetFile.getAbsolutePath());
+      final String sourceFile = sourceDir + "/" + fileName;
+      FileUtil.copyResource(getClass(), sourceFile, targetFile);
+      if (targetFile.exists()) {
+        LOG.info("Created default script: " + targetFile.getAbsolutePath());
+      } else {
+        LOG.warn("A required file is minning: " + targetFile.getAbsolutePath() + ". Probably missing resourse:" + sourceFile);
+      }
     }
   }
 
