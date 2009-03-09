@@ -327,7 +327,7 @@
   </component>
   <component name="ProjectFileVersion" converted="true" />
   <component name="ProjectKey">
-    <option name="state" value="http://svn.jetbrains.org/teamcity/plugins/groovy-plug/GroovyPlug.ipr" />
+    <option name="state" value="http://svn.jetbrains.org/teamcity/plugins/groovy-plug/trunk/GroovyPlug.ipr" />
   </component>
   <component name="ProjectModuleManager">
     <modules>
