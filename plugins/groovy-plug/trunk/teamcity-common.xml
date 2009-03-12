@@ -1,42 +1,130 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<project name="TeamCityPluginCommon" default="dist">
+<project name="TeamCityPluginCommon">
 
   <!--
-    # required properties
-    plugin.name=samplePlugin
-    teamcity.data.path=path.to.BuildServer
+  Tasks:
+                package.teamcity.plugin
+                deploy.teamcity.plugin
+                undeploy.teamcity.plugin
+                unpack.teamcity
 
-    # either plugin.output.server or plugin.output.agent should be defined
-    plugin.output.server=path.to.compiled.server.plugin.output
-    plugin.output.agent=path.to.compiled.agent.plugin.output
-
-    # necessary if "deploy" target is used
-    path.variable.teamcitydistribution=path.to.unpacked.tar.gz.TeamCity.distribution"/>
+  Targets:
+                check.teamcitydistribution
   -->
+  <property name="default.dist" value="dist"/>
+
+  <macrodef name="package.teamcity.plugin" description="packages TeamCity plugin">
+    <attribute name="name"/>
+    <attribute name="server.output" default="" description="path to compiled server plugin output"/>
+    <attribute name="agent.output" default="" description="path to compiled agent plugin output"/>
+    <attribute name="common.output" default="" description="path to compiled common plugin output"/>
+    <attribute name="dist" default="${default.dist}" description="directory to put prepared plugin zip"/>
+
+    <sequential>
+      <condition property="plugin.output.server" value="@{server.output}">
+        <length string="@{server.output}" when="greater" length="0"/>
+      </condition>
+      <condition property="plugin.output.agent" value="@{agent.output}">
+        <length string="@{agent.output}" when="greater" length="0"/>
+      </condition>
+      <condition property="plugin.output.common" value="@{common.output}">
+        <length string="@{common.output}" when="greater" length="0"/>
+      </condition>
+
+      <property name="plugin.name" value="@{name}"/>
+
+      <property name="teamcity-plugin.xml" value="${basedir}/teamcity-plugin.xml"/>
+      <property name="common.jar" value="${plugin.name}-common.jar"/>
+
+      <property name="dist" value="@{dist}"/>
+      <property name="dist.unpacked" value="${dist}/unpacked"/>
+      <property name="distrib.prep" value="${basedir}/temp/dist_prep"/>
+      <property name="distrib.prep.agent" value="${distrib.prep}/agent"/>
+      <property name="distrib.prep.common" value="${distrib.prep}/common"/>
+      <property name="distrib.prep.agent.jars" value="${distrib.prep.agent}/unpacked"/>
+
+      <antcall target="teamcity.package.plugin.internal"/>
+    </sequential>
+  </macrodef>
+
+  <target name="check.teamcitydistribution" description="checks whether TeamCity distribution ready to be used by IDEA-generated build">
+    <check.property name="path.variable.teamcitydistribution"
+                    fail-message="Please define the property in build.properties file. The property should point to unpacked TeamCity .tar.gz or .exe distribution."/>
+  </target>
 
 
-  <property name="dist" value="dist"/>
-  <property name="dist.unpacked" value="${dist}/unpacked"/>
-  <property name="distrib.prep" value="${basedir}/temp/dist_prep"/>
-  <property name="distrib.prep.server" value="${distrib.prep}/server"/>
-  <property name="distrib.prep.agent" value="${distrib.prep}/agent"/>
-  <property name="distrib.prep.agent.jars" value="${distrib.prep.agent}/unpacked"/>
+  <macrodef name="deploy.teamcity.plugin">
+    <attribute name="name"/>
+    <attribute name="teamcity.data.path" default="${user.home}/.BuildServer" description="path to .BuildServer"/>
+    <attribute name="dist" default="${default.dist}" description="directory storing prepared plugin zip"/>
+
+    <sequential>
+      <copy todir="@{teamcity.data.path}/plugins">
+        <fileset file="@{dist}/@{name}.zip"/>
+      </copy>
+    </sequential>
+  </macrodef>
+
+  <macrodef name="undeploy.teamcity.plugin">
+    <attribute name="name"/>
+    <attribute name="teamcity.data.path" default="${user.home}/.BuildServer" description="path to .BuildServer"/>
+
+    <sequential>
+      <delete file="@{teamcity.data.path}/plugins/@{name}.zip" quiet="true"/>
+    </sequential>
+  </macrodef>
+
+
+  <macrodef name="unpack.teamcity" description="TeamCity distribution unpacking">
+    <attribute name="distribution.dir" default="${basedir}/teamcity-dist"
+               description="path to put unpacked TeamCIty distribution into. Warning: the content of the directory will be deleted!"/>
+    <attribute name="teamcity.data.path" default="${user.home}/.BuildServer" description="path to .BuildServer"/>
+    <attribute name="teamcity.tar.gz-location" default="${basedir}" description="path where TeamCity-NNNN.tar.gz file resides"/>
+
+    <sequential>
+      <delete dir="@{distribution.dir}" quiet="true"/>
+      <mkdir dir="@{distribution.dir}"/>
+
+      <!-- TODO: issue error if there are several matching files -->
+
+      <untar compression="gzip" dest="@{distribution.dir}">
+        <fileset dir="@{teamcity.tar.gz-location}">
+          <include name="*.tar.gz"/>
+        </fileset>
+      </untar>
+
+      <move todir="@{distribution.dir}">
+        <fileset dir="@{distribution.dir}\TeamCity">
+          <include name="**"/>
+        </fileset>
+      </move>
+    </sequential>
+  </macrodef>
+
+
+  <!--   ** Implementation **   -->
+
 
   <target name="prepare.server.part" if="plugin.output.server">
-    <mkdir dir="${distrib.prep.server}"/>
+    <mkdir dir="${dist.unpacked}/server"/>
 
-    <copydir src="${plugin.output.server}" dest="${distrib.prep.server}"/>
-    <copy todir="${distrib.prep.server}/buildServerResources" failonerror="false">
-      <fileset dir="${basedir}/buildServerResources"/>
+    <jar destfile="${dist.unpacked}/server/${plugin.name}.jar">
+      <fileset dir="${plugin.output.server}"/>
+    </jar>
+
+    <copy todir="${dist.unpacked}/server" failonerror="false">
+      <fileset file="${distrib.prep.common}/${common.jar}"/>
     </copy>
+  </target>
 
-    <jar destfile="${dist.unpacked}/${plugin.name}.jar">
-      <fileset dir="${distrib.prep.server}"/>
+  <target name="prepare.common.part" if="plugin.output.common">
+    <mkdir dir="${distrib.prep.common}"/>
+    <jar destfile="${distrib.prep.common}/${common.jar}">
+      <fileset dir="${plugin.output.common}"/>
     </jar>
   </target>
 
   <target name="prepare.agent.part" if="plugin.output.agent">
-    <delete dir="${dist}/agent" quiet="true"/>
     <mkdir dir="${distrib.prep.agent}"/>
     <mkdir dir="${distrib.prep.agent.jars}/${plugin.name}/lib"/>
     <mkdir dir="${dist.unpacked}/agent"/>
@@ -45,25 +133,34 @@
       <fileset dir="${plugin.output.agent}"/>
     </jar>
 
+    <copy todir="${distrib.prep.agent.jars}/${plugin.name}/lib" failonerror="false">
+      <fileset file="${distrib.prep.common}/${common.jar}"/>
+    </copy>
+
     <zip destfile="${dist.unpacked}/agent/${plugin.name}.zip">
       <fileset dir="${distrib.prep.agent.jars}"/>
     </zip>
   </target>
 
-  <target name="build.jar" depends="all">
+  <target name="teamcity.build.jar.internal" depends="all">
     <delete dir="${dist.unpacked}" quiet="true"/>
     <delete dir="${distrib.prep}" quiet="true"/>
 
     <mkdir dir="${dist}"/>
     <mkdir dir="${dist.unpacked}"/>
 
+    <antcall target="prepare.common.part"/>
     <antcall target="prepare.server.part"/>
     <antcall target="prepare.agent.part"/>
+
+    <copy todir="${dist.unpacked}">
+      <fileset file="${teamcity-plugin.xml}"/>
+    </copy>
 
     <delete dir="${distrib.prep}" quiet="true"/>
   </target>
 
-  <target name="package" depends="check, build.jar">
+  <target name="teamcity.package.plugin.internal" depends="teamcity.check.properties.internal, teamcity.build.jar.internal">
     <delete file="${dist}/${plugin.name}.zip" quiet="true"/>
     <zip destfile="${dist}/${plugin.name}.zip">
       <fileset dir="${dist.unpacked}"/>
@@ -71,10 +168,8 @@
     <echo message="To install the plugin, place '${dist}\${plugin.name}.zip' into '.BuildServer/plugins' directory"/>
   </target>
 
-  <target name="check">
+  <target name="teamcity.check.properties.internal">
     <check.property name="plugin.name"/>
-    <check.property name="path.variable.teamcitydistribution"
-                    fail-message="Please define the property in build.properties file. The property should point to unpacked TeamCity .tar.gz or .exe distribution."/>
 
     <condition property="is.configured.output.paths">
       <not>
@@ -111,48 +206,5 @@
             message="Property '@{name}' not defined. @{fail-message}"/>
     </sequential>
   </macrodef>
-
-  <!-- TeamCity distribution unpacking -->
-  <target name="teamcity.unpack">
-
-    <property name="distribution.dir" value="${basedir}/teamcity-dist"/>
-    <property name="teamcity.tar.gz-location" value="."/>
-
-    <delete dir="${distribution.dir}" quiet="true"/>
-    <mkdir dir="${distribution.dir}"/>
-
-    <untar compression="gzip" dest="${distribution.dir}">
-      <fileset dir="${teamcity.tar.gz-location}">
-        <include name="*.tar.gz"/>
-      </fileset>
-    </untar>
-
-    <move todir="${distribution.dir}">
-      <fileset dir="${distribution.dir}\TeamCity">
-        <include name="**"/>
-      </fileset>
-    </move>
-  </target>
-
-  <target name="deploy" depends="dist">
-    <check.property name="teamcity.data.path" fail-message="Should store path to TeamCity .BuildServer directory."/>
-    <property name="plugin.deploy.dir" value="${teamcity.data.path}/plugins"/>
-
-    <!-- copy plugin -->
-    <mkdir dir="${plugin.deploy.dir}"/>
-    <copy todir="${plugin.deploy.dir}">
-      <fileset file="${dist}/${plugin.name}.zip"/>
-    </copy>
-  </target>
-
-  <target name="undeploy">
-    <delete file="${plugin.deploy.dir}/${plugin.name}.zip" quiet="true"/>
-    <delete>
-      <fileset dir="${teamcity.tar.gz-location}">
-        <include name="*.tar.gz"/>
-      </fileset>
-    </delete>
-  </target>
-
 
 </project>
