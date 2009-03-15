@@ -47,7 +47,7 @@ public class GroovyScriptsPreparer {
   }
 
   private void copyResource(String sourceDir, String targetDir, String fileName) {
-    final File targetFile = new File(targetDir, fileName);
+    final File targetFile = new File(targetDir + "/" + fileName);
     if (!targetFile.exists()) {
       final String sourceFile = sourceDir + "/" + fileName;
       FileUtil.copyResource(getClass(), sourceFile, targetFile);

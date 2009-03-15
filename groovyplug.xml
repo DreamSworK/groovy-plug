@@ -21,15 +21,15 @@
     <exclude name="**/rcs/**"/>
     <exclude name="**/.DS_Store/**"/>
     <exclude name="**/.svn/**"/>
-    <exclude name="**/.sbas/**"/>
-    <exclude name="**/.IJI.*/**"/>
-    <exclude name="**/vssver.scc/**"/>
-    <exclude name="**/vssver2.scc/**"/>
     <exclude name="**/.pyc/**"/>
     <exclude name="**/.pyo/**"/>
     <exclude name="**/*.pyc/**"/>
     <exclude name="**/*.pyo/**"/>
     <exclude name="**/.git/**"/>
+    <exclude name="**/.sbas/**"/>
+    <exclude name="**/.IJI.*/**"/>
+    <exclude name="**/vssver.scc/**"/>
+    <exclude name="**/vssver2.scc/**"/>
   </patternset>
   <patternset id="library.patterns">
     <include name="*.zip"/>
@@ -64,24 +64,21 @@
   </path>
   
   <path id="library.teamcity_open_api_common.classpath">
-    <pathelement location="${path.variable.teamcitydistribution}/devPackage/common-api.jar"/>
-    <pathelement location="${path.variable.teamcitydistribution}/devPackage/runtime-util.jar"/>
+    <pathelement location="d:/work/TeamCity/TeamCity/devPackage/common-api.jar"/>
+    <pathelement location="d:/work/TeamCity/TeamCity/devPackage/runtime-util.jar"/>
   </path>
   
   <path id="library.teamcity_open_api_server.classpath">
-    <pathelement location="${path.variable.teamcitydistribution}/devPackage/server-api.jar"/>
+    <pathelement location="d:/work/TeamCity/TeamCity/devPackage/server-api.jar"/>
   </path>
   
   <path id="library.teamcity_third-party.classpath">
-    <pathelement location="${path.variable.teamcitydistribution}/webapps/ROOT/WEB-INF/lib/annotations.jar"/>
-    <pathelement location="${path.variable.teamcitydistribution}/webapps/ROOT/WEB-INF/lib/openapi.jar"/>
-    <pathelement location="${path.variable.teamcitydistribution}/webapps/ROOT/WEB-INF/lib/spring-webmvc.jar"/>
-    <pathelement location="${path.variable.teamcitydistribution}/webapps/ROOT/WEB-INF/lib/spring.jar"/>
-    <pathelement location="${path.variable.teamcitydistribution}/webapps/ROOT/WEB-INF/lib/util.jar"/>
+    <pathelement location="d:/work/TeamCity/TeamCity/webapps/ROOT/WEB-INF/lib/annotations.jar"/>
+    <pathelement location="d:/work/TeamCity/TeamCity/webapps/ROOT/WEB-INF/lib/openapi.jar"/>
+    <pathelement location="d:/work/TeamCity/TeamCity/webapps/ROOT/WEB-INF/lib/spring-webmvc.jar"/>
+    <pathelement location="d:/work/TeamCity/TeamCity/webapps/ROOT/WEB-INF/lib/spring.jar"/>
+    <pathelement location="d:/work/TeamCity/TeamCity/webapps/ROOT/WEB-INF/lib/util.jar"/>
   </path>
-  
-  
-  <!-- Application Server Libraries -->
   
   <!-- Custom Compiler Taskdefs -->
   <property name="grooovyc.task.sdk" value="library.groovy.classpath"/>
@@ -133,6 +130,7 @@
   <path id="groovyplug.module.sourcepath">
     <dirset dir="${module.groovyplug.basedir}">
       <include name="src"/>
+      <include name="src-runtime"/>
     </dirset>
   </path>
   
@@ -152,6 +150,10 @@
     
     <copy todir="${groovyplug.output.dir}">
       <fileset dir="${module.groovyplug.basedir}/src">
+        <patternset refid="compiler.resources"/>
+        <type type="file"/>
+      </fileset>
+      <fileset dir="${module.groovyplug.basedir}/src-runtime">
         <patternset refid="compiler.resources"/>
         <type type="file"/>
       </fileset>
