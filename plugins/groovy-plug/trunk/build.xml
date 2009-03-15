@@ -9,8 +9,8 @@
   <target name="package">
     <package.teamcity.plugin name="${plugin.name}" server.output="${groovyplug.output.dir}"/>
     <!-- Groovy specific -->
-    <delete dir="${dist}/application_libs" quiet="true"/>
-    <copy todir="${dist}/application_libs">
+    <delete dir="dist/application_libs" quiet="true"/>
+    <copy todir="dist/application_libs">
       <fileset dir="lib" excludes="**/.svn/**,commons-cli-1.0.jar"/>
     </copy>
     <echo message="After plugin installation, copy files from 'application_libs' into '&lt;TeamCity home&gt;/webapps/ROOT/WEB-INF/lib' directory"/>
@@ -20,6 +20,9 @@
 
   <target name="clean" depends="groovyplug.clean"/>
 
+  <target name="deploy">
+    <deploy.teamcity.plugin name="${plugin.name}" />
+  </target>
 </project>
 
         
