@@ -24,24 +24,42 @@ import jetbrains.buildServer.serverSide.buildDistribution.BuildDistributorInput
 import jetbrains.buildServer.serverSide.buildDistribution.SimpleWaitReason
 import jetbrains.buildServer.serverSide.buildDistribution.BuildPromotionInfo
 import jetbrains.buildServer.serverSide.buildDistribution.RunningBuildInfo
+import jetbrains.buildServer.BuildAgent
 
 /**
  * User: Yegor Yarko
  * Date: 15.03.2009
+ *
+ * Further possible improvements:
+ * - provide lock waiting details in the WaitReason
+ * - do not allow read-lock builds to start is there are write-locks builds earlier in the queue (?)  
+ *
  */
 
 public class BuildResourcesLock implements StartBuildPrecondition {
   private static final Logger LOG = Logger.getInstance(BuildResourcesLock.class.getName());
 
-  public WaitReason canStart(QueuedBuildInfo queuedBuild, BuildDistributorInput buildDistributorInput, boolean emulationMode) {
+  @Override
+  public WaitReason canStart(QueuedBuildInfo queuedBuild, Map<QueuedBuildInfo, BuildAgent> canBeStarted, BuildDistributorInput buildDistributorInput, boolean emulationMode) {
     HashSet locks = LocksUtil.getBuildLocks(queuedBuild.getBuildPromotionInfo())
     if (!emulationMode && LOG.isDebugEnabled()) {
       LOG.debug("Found locks " + locks + " for build promotion " + queuedBuild.getBuildPromotionInfo());
     }
-    if (!LocksUtil.available(locks, buildDistributorInput.getRunningBuilds())) {
+    if (!LocksUtil.available(locks, getBuildPromotions(buildDistributorInput.getRunningBuilds(), canBeStarted.keySet()))) {
       return new SimpleWaitReason("Waiting for build locks to free.");
     }
     return null;
+  }
+
+  Collection<BuildPromotionInfo> getBuildPromotions(Collection<RunningBuildInfo> runningBuildInfos, Collection<QueuedBuildInfo> queuedBuildInfos) {
+    ArrayList<BuildPromotionInfo> result = new ArrayList<BuildPromotionInfo>(runningBuildInfos.size() + queuedBuildInfos.size());
+    for (RunningBuildInfo runningBuildInfo:runningBuildInfos){
+      result.add(runningBuildInfo.getBuildPromotionInfo());
+    }
+    for (QueuedBuildInfo queuedBuildInfo:queuedBuildInfos){
+      result.add(queuedBuildInfo.getBuildPromotionInfo());
+    }
+    return result;
   }
 }
 
@@ -97,11 +115,10 @@ class TakenLockInfo {
 public class LocksUtil {
   private static final Logger LOG = Logger.getInstance(LocksUtil.class.getName());
 
-  static boolean available(Collection<Lock> locksToTake, Collection<RunningBuildInfo> runningBuildInfos) {
+  static boolean available(Collection<Lock> locksToTake, Collection<BuildPromotionInfo> buildPromotionInfos) {
     LockManager locksManager = new LockManager();
-    for (RunningBuildInfo runningBuildInfo: runningBuildInfos) {
-      BuildPromotionInfo buildPromotion = runningBuildInfo.getBuildPromotionInfo()
-      locksManager.lock(getBuildLocks(buildPromotion), buildPromotion);
+    for (BuildPromotionInfo buildPromotionInfo: buildPromotionInfos) {
+      locksManager.lock(getBuildLocks(buildPromotionInfo), buildPromotionInfo);
     }
     return locksManager.canLock(locksToTake);
   }
