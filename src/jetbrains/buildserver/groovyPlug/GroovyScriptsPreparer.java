@@ -21,6 +21,7 @@ import jetbrains.buildServer.util.FileUtil;
 import jetbrains.buildServer.serverSide.ServerPaths;
 
 import java.io.File;
+import java.io.IOException;
 
 /**
  * @author Yegor.Yarko
@@ -42,20 +43,60 @@ public class GroovyScriptsPreparer {
     final String targetDir = new File(myServerPaths.getConfigDir(), myTargetDirUnderConfig).getAbsolutePath();
     new File(targetDir).mkdirs();
     for (String fileName : myFileNames) {
-      copyResource(mySourceResourceDir, targetDir, fileName);
+      createOrUpdateFile(mySourceResourceDir, targetDir, fileName);
     }
   }
 
-  private void copyResource(String sourceDir, String targetDir, String fileName) {
+  private void updateMarkerFile(File markerFile) {
+    if (!markerFile.delete()) {
+      LOG.error("Cannot delete file: " + markerFile.getAbsolutePath());
+    }
+
+    try {
+      markerFile.createNewFile();
+    } catch (IOException e) {
+      LOG.error("Cannot write file: " + markerFile.getAbsolutePath());
+    }
+  }
+
+  private void createOrUpdateFile(String sourceDir, String targetDir, String fileName) {
+    final String resourceFile = sourceDir + "/" + fileName;
     final File targetFile = new File(targetDir + "/" + fileName);
-    if (!targetFile.exists()) {
-      final String sourceFile = sourceDir + "/" + fileName;
-      FileUtil.copyResource(getClass(), sourceFile, targetFile);
-      if (targetFile.exists()) {
-        LOG.info("Created default script: " + targetFile.getAbsolutePath());
-      } else {
-        LOG.warn("A required file is minning: " + targetFile.getAbsolutePath() + ". Probably missing resourse:" + sourceFile);
+    final File targetOriginalFile = new File(targetDir + "/" + fileName + ".orig");
+    if (targetFile.exists()) {
+      if (!areSame(targetFile, targetOriginalFile)) {
+        updateFile(resourceFile, targetOriginalFile);
+        LOG.info("The file " + targetFile.getAbsolutePath() + " is modified since original, updated original copy only.");
       }
+    } else {
+      updateFile(resourceFile, targetFile);
+      updateFile(resourceFile, targetOriginalFile);
+    }
+  }
+
+  private boolean areSame(File file1, File file2) {
+    return (file1.exists() == file2.exists()) &&
+           ((file2.lastModified() - file1.lastModified()) < 1000) &&
+           (file1.length() == file2.length());
+  }
+
+  private void updateFile(String resourceFile, File targetFile) {
+    if (targetFile.exists()) {
+      if (!targetFile.delete()) {
+        LOG.warn("Cannot save original file to file " + targetFile.getAbsolutePath() + " bacause the file cannot be deleted.");
+        return;
+      }
+    }
+    copyResource(resourceFile, targetFile);
+  }
+
+  private void copyResource(String resourceFile, File targetFile) {
+    String operation = targetFile.exists() ? "Updated" : "Created";
+    FileUtil.copyResource(getClass(), resourceFile, targetFile);
+    if (targetFile.exists()) {
+      LOG.info(operation + " file: " + targetFile.getAbsolutePath());
+    } else {
+      LOG.warn("A required file is missing: " + targetFile.getAbsolutePath() + ". Probably missing resource:" + resourceFile);
     }
   }
 
