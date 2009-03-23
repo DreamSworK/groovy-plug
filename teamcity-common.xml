@@ -25,6 +25,9 @@
     <attribute name="out.unpacked" default="@{out}/unpacked"
                description="name of the directory to store unpacked plugin (not packed into zip)"/>
 
+    <attribute name="server.lib.dir" default="" description="directory to get libs for the server part"/>
+    <attribute name="server.lib.includes" default="none should match" description="includes pattern of the files in the directory"/>
+
     <sequential>
 
       <antcall target="check.already.defined"/>
@@ -63,6 +66,8 @@
         <param name="name" value="@{name}"/>
         <param name="server.output" value="@{server.output}"/>
         <param name="common.jar.name" value="@{common.jar.name}"/>
+        <param name="lib.dir" value="@{server.lib.dir}"/>
+        <param name="lib.includes" value="@{server.lib.includes}"/>
       </antcall>
 
       <antcall target="prepare.agent.part">
@@ -90,9 +95,19 @@
 
   <target name="check.teamcitydistribution" description="checks whether TeamCity distribution ready to be used by IDEA-generated build">
     <check.property name="path.variable.teamcitydistribution"
-                    fail-message="Please define 'path.variable.teamcitydistribution' property in build.properties file. The property should point to unpacked TeamCity .tar.gz or .exe distribution."/>
-  </target>
+                    fail-message="Please define 'path.variable.teamcitydistribution' property in build.properties file. The property should point to unpacked TeamCity .tar.gz or .exe distribution."
+        />
 
+      <condition property="teamcity.distribution.not.present">
+        <not>
+          <and>
+              <available file="${path.variable.teamcitydistribution}/webapps/ROOT/WEB-INF/lib"/>
+          </and>
+        </not>
+      </condition>
+      <fail if="teamcity.distribution.not.present"
+            message="Cannot find TeamCity distribution at path '${path.variable.teamcitydistribution}'. The property 'path.variable.teamcitydistribution' should point to unpacked TeamCity .tar.gz or .exe distribution."/>
+  </target>
 
   <macrodef name="deploy.teamcity.plugin">
     <attribute name="name"/>
@@ -146,6 +161,7 @@
   <macrodef name="check.property">
     <attribute name="name"/>
     <attribute name="fail-message" default=""/>
+    <attribute name="check-path" default=""/>
     <sequential>
       <condition property="is.configured.@{name}">
         <not>
@@ -178,6 +194,7 @@
 
     <copy todir="${out.unpacked}/server" failonerror="false">
       <fileset file="${teamcity.internal.distrib.prep.common}/${common.jar.name}"/>
+      <fileset dir="${lib.dir}" includes="${lib.includes}"/>
     </copy>
   </target>
 
