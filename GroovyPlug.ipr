@@ -353,6 +353,37 @@
     <option name="ADDITIONAL_OPTIONS_STRING" value="" />
   </component>
   <component name="SvnBranchConfigurationManager">
+    <option name="myConfigurationMap">
+      <map>
+        <entry key="$PROJECT_DIR$">
+          <value>
+            <SvnBranchConfiguration>
+              <option name="branchMap">
+                <map>
+                  <entry key="http://svn.jetbrains.org/teamcity/plugins/groovy-plug/branches">
+                    <value>
+                      <list>
+                        <SvnBranchItem>
+                          <option name="creationDateMillis" value="1236247136733" />
+                          <option name="revision" value="860" />
+                          <option name="url" value="http://svn.jetbrains.org/teamcity/plugins/groovy-plug/branches/Calcutta-4.0.x" />
+                        </SvnBranchItem>
+                      </list>
+                    </value>
+                  </entry>
+                </map>
+              </option>
+              <option name="branchUrls">
+                <list>
+                  <option value="http://svn.jetbrains.org/teamcity/plugins/groovy-plug/branches" />
+                </list>
+              </option>
+              <option name="trunkUrl" value="http://svn.jetbrains.org/teamcity/plugins/groovy-plug/trunk" />
+            </SvnBranchConfiguration>
+          </value>
+        </entry>
+      </map>
+    </option>
     <option name="myVersion" value="124" />
     <option name="mySupportsUserInfoFilter" value="true" />
   </component>
@@ -420,10 +451,10 @@
     </library>
     <library name="Groovy">
       <CLASSES>
-        <root url="jar://$PROJECT_DIR$/lib/groovy-1.5.6.jar!/" />
-        <root url="jar://$PROJECT_DIR$/lib/asm-2.2.jar!/" />
-        <root url="jar://$PROJECT_DIR$/lib/antlr-2.7.6.jar!/" />
         <root url="jar://$PROJECT_DIR$/lib/commons-cli-1.0.jar!/" />
+        <root url="jar://$PROJECT_DIR$/lib/antlr-2.7.7.jar!/" />
+        <root url="jar://$PROJECT_DIR$/lib/groovy-1.6.0.jar!/" />
+        <root url="jar://$PROJECT_DIR$/lib/asm-2.2.3.jar!/" />
       </CLASSES>
       <JAVADOC />
       <SOURCES />
