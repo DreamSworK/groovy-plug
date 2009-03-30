@@ -26,6 +26,8 @@ import jetbrains.buildServer.serverSide.ServerExtensionHolder
 import jetbrains.buildServer.vcs.SVcsModification
 import jetbrains.buildServer.vcs.VcsModificationHistory
 import org.jetbrains.annotations.Nullable
+import jetbrains.buildServer.vcs.VcsRootEntry
+import jetbrains.buildServer.vcs.SVcsRoot
 
 /**
  * @author Yegor.Yarko
@@ -48,6 +50,7 @@ public class GroovyPropertyProvider implements ParametersPreprocessor {
 
     addLastModification(buildParamsToAdd, build);
     addBuildStartTime(buildParamsToAdd, build);
+    addLastModificationsRevisions(buildParamsToAdd, build);
 
     addBuildParameters(buildParamsToAdd, buildParams)
   }
@@ -84,4 +87,36 @@ public class GroovyPropertyProvider implements ParametersPreprocessor {
     Util.addDateTimeProperty(buildParametersToAdd, buildStartTime, "HHmmss", "build.start.time", "BUILD_START_TIME");
   }
 
+  void addLastModificationsRevisions(HashMap<java.lang.String, java.lang.String> buildParametersToAdd, SRunningBuild build) {
+    final List<VcsRootEntry> rootEntries = build.getVcsRootEntries();
+    final Map<SVcsRoot, String> rootVersions = new HashMap<SVcsRoot, String>();
+
+    List<SVcsModification> modifications = vcsModificationHistory.getAllModifications(build.getBuildType());
+    int toFill = rootEntries.size();
+
+    for (SVcsModification modifiction: modifications) {
+      String version = modifiction.getVersion()
+      if (rootVersions.get(modifiction.getVcsRoot().getId()) == null && version != null) {
+        rootVersions.put(modifiction.getVcsRoot(), version);
+        --toFill;
+      }
+      if (toFill == 0) {
+        break
+      }
+    }
+
+    for (Map.Entry<SVcsRoot, String> version: rootVersions.entrySet()) {
+
+      String name = jetbrains.buildServer.util.StringUtil.replaceNonAlphaNumericChars(version.getKey().getName(), (char) '_');
+      buildParametersToAdd.put("env.BUILD_REVISION_" + name, version.getValue());
+      buildParametersToAdd.put("system.build.revision." + name, version.getValue());
+    }
+    if (rootEntries.size() == 1 && rootVersions.size() == 1) {
+      String version = rootVersions.entrySet().iterator().next().getValue();
+      if (version != null) {
+        buildParametersToAdd.put("env.BUILD_REVISION", version);
+        buildParametersToAdd.put("system.build.revision", version);
+      }
+    }
+  }
 }
