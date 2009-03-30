@@ -94,14 +94,17 @@ public class GroovyPropertyProvider implements ParametersPreprocessor {
     List<SVcsModification> modifications = vcsModificationHistory.getAllModifications(build.getBuildType());
     int toFill = rootEntries.size();
 
+    SVcsModification lastModification = getLastModification(build);
     for (SVcsModification modification: modifications) {
-      String version = modification.getDisplayVersion();
-      if (rootVersions.get(modification.getVcsRoot()) == null && version != null) {
-        rootVersions.put(modification.getVcsRoot(), version);
-        --toFill;
-      }
-      if (toFill == 0) {
-        break
+      if (modification <= lastModification) {
+        String version = modification.getDisplayVersion();
+        if (rootVersions.get(modification.getVcsRoot()) == null && version != null) {
+          rootVersions.put(modification.getVcsRoot(), version);
+          --toFill;
+        }
+        if (toFill == 0) {
+          break
+        }
       }
     }
 
