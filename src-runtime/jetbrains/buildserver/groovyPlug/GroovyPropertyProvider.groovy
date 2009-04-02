@@ -108,17 +108,14 @@ public class GroovyPropertyProvider implements ParametersPreprocessor {
       }
     }
 
-    for (Map.Entry<SVcsRoot, String> version: rootVersions.entrySet()) {
-
-      String name = jetbrains.buildServer.util.StringUtil.replaceNonAlphaNumericChars(version.getKey().getName(), (char) '_');
-      buildParametersToAdd.put("env.BUILD_REVISION_" + name, version.getValue());
-      buildParametersToAdd.put("system.build.revision." + name, version.getValue());
+    for (Map.Entry<SVcsRoot, String> versionEntry: rootVersions.entrySet()) {
+      String name = jetbrains.buildServer.util.StringUtil.replaceNonAlphaNumericChars(versionEntry.getKey().getName(), (char) '_');
+      Util.addProperty(buildParametersToAdd, "build.vcs.lastIncluded.revision." + name, "BUILD_VCS_LASTINCLUDED_REVISION_" + name, versionEntry.getValue())
     }
     if (rootEntries.size() == 1 && rootVersions.size() == 1) {
       String version = rootVersions.entrySet().iterator().next().getValue();
       if (version != null) {
-        buildParametersToAdd.put("env.BUILD_REVISION", version);
-        buildParametersToAdd.put("system.build.revision", version);
+        Util.addProperty(buildParametersToAdd, "build.vcs.lastIncluided.revision", "BUILD_VCS_LASTINCLUDED_REVISION", version)
       }
     }
   }
