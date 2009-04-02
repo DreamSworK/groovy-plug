@@ -62,7 +62,7 @@ public class GroovyScriptsPreparer {
   private void createOrUpdateFile(String sourceDir, String targetDir, String fileName) {
     final String resourceFile = sourceDir + "/" + fileName;
     final File targetFile = new File(targetDir + "/" + fileName);
-    final File targetOriginalFile = new File(targetDir + "/" + fileName + ".orig");
+    final File targetOriginalFile = new File(targetDir + "/" + fileName + ".dist");
     if (targetFile.exists()) {
       if (!areSame(targetFile, targetOriginalFile)) {
         updateFile(resourceFile, targetOriginalFile);
