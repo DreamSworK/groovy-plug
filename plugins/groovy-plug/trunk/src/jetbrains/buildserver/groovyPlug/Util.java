@@ -15,6 +15,9 @@
  */
 package jetbrains.buildserver.groovyPlug;
 
+import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
+
 import java.util.Map;
 import java.util.Date;
 import java.text.SimpleDateFormat;
@@ -24,10 +27,21 @@ import java.text.SimpleDateFormat;
  *         Date: 04.03.2009
  */
 public class Util {
-  public static void addDateTimeProperty(Map<String, String> buildParametersToAdd, Date date, String dateFormat, String systemParamName, String envParamName) {
+  public static void addDateTimeProperty(Map<String, String> buildParametersToAdd,
+                                         Date date,
+                                         String dateFormat,
+                                         String systemParamName,
+                                         String envParamName) {
     String formattedDate = (new SimpleDateFormat(dateFormat)).format(date);
-    if (systemParamName != null) buildParametersToAdd.put("system." + systemParamName, formattedDate);
-    if (envParamName != null) buildParametersToAdd.put("env." + envParamName, formattedDate);
+    addProperty(buildParametersToAdd, systemParamName, envParamName, formattedDate);
+  }
+
+  public static void addProperty(@NotNull final Map<String, String> buildParametersToAdd,
+                                 @Nullable final String systemParamName,
+                                 @Nullable final String envParamName,
+                                 @NotNull final String value) {
+    if (systemParamName != null) buildParametersToAdd.put("system." + systemParamName, value);
+    if (envParamName != null) buildParametersToAdd.put("env." + envParamName, value);
   }
 
 }
