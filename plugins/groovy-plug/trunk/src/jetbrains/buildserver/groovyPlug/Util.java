@@ -44,4 +44,12 @@ public class Util {
     if (envParamName != null) buildParametersToAdd.put("env." + envParamName, value);
   }
 
+  public static void addDateTimeProperty(Map<String, String> buildParametersToAdd,
+                                         Date date,
+                                         String dateFormat,
+                                         String fullPropertyName) {
+    String formattedDate = (new SimpleDateFormat(dateFormat)).format(date);
+    buildParametersToAdd.put(fullPropertyName, formattedDate);
+  }
+
 }
