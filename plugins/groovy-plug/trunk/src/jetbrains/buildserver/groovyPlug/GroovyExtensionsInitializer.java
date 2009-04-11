@@ -18,6 +18,8 @@ package jetbrains.buildserver.groovyPlug;
 
 import jetbrains.buildServer.serverSide.ParametersPreprocessor;
 import jetbrains.buildServer.serverSide.ServerExtensionHolder;
+import jetbrains.buildServer.serverSide.BuildServerListener;
+import jetbrains.buildServer.serverSide.SBuildServer;
 import jetbrains.buildServer.serverSide.parameters.BuildParameterReferencesProvider;
 
 /**
@@ -25,13 +27,17 @@ import jetbrains.buildServer.serverSide.parameters.BuildParameterReferencesProvi
  *         Date: 16.01.2009
  */
 
-public class GroovyPropertyProviderInitializer {
+public class GroovyExtensionsInitializer {
+  private ServerExtensionHolder myExtensionsHolder;
+  private SBuildServer myServer;
+
   ParametersPreprocessor myPropertyProvider;
   BuildParameterReferencesProvider myReferencePropertyProvider;
-  private ServerExtensionHolder myExtensionsHolder;
+  BuildServerListener myBuildServerListener;
 
-  public GroovyPropertyProviderInitializer(ServerExtensionHolder extensionHolder) {
+  public GroovyExtensionsInitializer(ServerExtensionHolder extensionHolder, SBuildServer server) {
     this.myExtensionsHolder = extensionHolder;
+    this.myServer = server;
   }
 
   public void setPropertyProvider(ParametersPreprocessor myPropertyProvider) {
@@ -42,8 +48,18 @@ public class GroovyPropertyProviderInitializer {
     this.myReferencePropertyProvider = referencePropertyProvider;
   }
 
-  public void init(){
-    myExtensionsHolder.registerExtension(ParametersPreprocessor.class, "myPropertyProvider", myPropertyProvider);
-    myExtensionsHolder.registerExtension(BuildParameterReferencesProvider.class, "myReferencePropertyProvider", myReferencePropertyProvider);
+  public void setBuildServerListener(BuildServerListener buildServerListeneruildServerListener) {
+    this.myBuildServerListener = buildServerListeneruildServerListener;
+  }
+
+  public void init() {
+    if (myPropertyProvider != null) {
+      myExtensionsHolder.registerExtension(ParametersPreprocessor.class, "myPropertyProvider", myPropertyProvider);
+    }
+    if (myReferencePropertyProvider != null) {
+      myExtensionsHolder
+        .registerExtension(BuildParameterReferencesProvider.class, "myReferencePropertyProvider", myReferencePropertyProvider);
+    }
+    if (myBuildServerListener != null) myServer.addListener(myBuildServerListener);
   }
 }
