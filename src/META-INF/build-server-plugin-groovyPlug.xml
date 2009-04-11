@@ -11,7 +11,7 @@
   <bean id="scriptPreparer" class="jetbrains.buildserver.groovyPlug.GroovyScriptsPreparer" init-method="init">
     <property name="sourceResourceDir" value="/jetbrains/buildserver/groovyPlug"/>
     <property name="targetDirUnderConfig" value="__groovyPlug__"/>
-    <property name="fileNames" value="GroovyPropertyProvider.groovy,GroovyReferencePropertiesProvider.groovy,BuildResourcesLock.groovy"/>
+    <property name="fileNames" value="GroovyPropertyProvider.groovy,GroovyReferencePropertiesProvider.groovy,BuildResourcesLock.groovy,GroovyBuildServerListener.groovy"/>
   </bean>
 
   <!-- Dependency on scriptPreparer is needed to ensure it is initialized before groovy bean definition tries to be parsed -->
@@ -24,10 +24,7 @@
     <property name="properties" ref="customProps"/>
   </bean>
 
-  <bean class="jetbrains.buildserver.groovyPlug.GroovyPropertyProviderInitializer" init-method="init">
-    <property name="propertyProvider" ref="groovyPropertyProvider"/>
-    <property name="referencePropertyProvider" ref="groovyReferencePropertyProvider"/>
-  </bean>
+
 
   <lang:groovy id="groovyPropertyProvider" refresh-check-delay="5000"
                script-source="file:/${groovyplug.dir}/GroovyPropertyProvider.groovy">
@@ -42,4 +39,15 @@
                script-source="file:/${groovyplug.dir}/BuildResourcesLock.groovy">
   </lang:groovy>
 
+  <lang:groovy id="buildServerListener" refresh-check-delay="5000"
+               script-source="file:/${groovyplug.dir}/GroovyBuildServerListener.groovy">
+  </lang:groovy>
+
+
+  <bean class="jetbrains.buildserver.groovyPlug.GroovyExtensionsInitializer" init-method="init">
+    <property name="propertyProvider" ref="groovyPropertyProvider"/>
+    <property name="referencePropertyProvider" ref="groovyReferencePropertyProvider"/>
+    <property name="buildServerListener" ref="buildServerListener"/>
+  </bean>
+  
 </beans>
