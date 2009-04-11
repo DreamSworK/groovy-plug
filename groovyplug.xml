@@ -7,6 +7,15 @@
   <!-- 
   <property name="skip.tests" value="true"/>
    -->
+  <property name="javac2.home" value="${idea.home}/lib"/>
+  <path id="javac2.classpath">
+    <pathelement location="${javac2.home}/javac2.jar"/>
+    <pathelement location="${javac2.home}/jdom.jar"/>
+    <pathelement location="${javac2.home}/asm.jar"/>
+    <pathelement location="${javac2.home}/asm-commons.jar"/>
+  </path>
+  <taskdef name="javac2" classname="com.intellij.ant.Javac2" classpathref="javac2.classpath"/>
+  <taskdef name="instrumentIdeaExtensions" classname="com.intellij.ant.InstrumentIdeaExtensions" classpathref="javac2.classpath"/>
   
   <!-- Compiler options -->
   
@@ -30,6 +39,7 @@
     <exclude name="**/*.pyc/**"/>
     <exclude name="**/*.pyo/**"/>
     <exclude name="**/.git/**"/>
+    <exclude name="**/*.hprof/**"/>
   </patternset>
   <patternset id="library.patterns">
     <include name="*.zip"/>
@@ -150,6 +160,13 @@
         <compilerarg line="${compiler.args.groovyplug}"/>
       </javac>
     </groovyc>
+    <instrumentIdeaExtensions destdir="${groovyplug.output.dir}">
+      <compilerarg line="${compiler.args.groovyplug}"/>
+      <bootclasspath refid="groovyplug.module.bootclasspath"/>
+      <classpath refid="groovyplug.module.classpath"/>
+      <src refid="groovyplug.module.sourcepath"/>
+      <patternset refid="excluded.from.compilation.groovyplug"/>
+    </instrumentIdeaExtensions>
     
     <copy todir="${groovyplug.output.dir}">
       <fileset dir="${module.groovyplug.basedir}/src">
