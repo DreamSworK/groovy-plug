@@ -57,8 +57,8 @@ public class GroovyReferencePropertiesProvider extends AbstractBuildParameterRef
 
   void addBuildStartTime(Map<java.lang.String, java.lang.String> buildParametersToAdd, SBuild build) {
     Date buildStartTime = build.getStartDate();
-    Util.addDateTimeProperty(buildParametersToAdd, buildStartTime, "yyyyMMdd", "build.start.date", "BUILD_START_DATE");
-    Util.addDateTimeProperty(buildParametersToAdd, buildStartTime, "HHmmss", "build.start.time", "BUILD_START_TIME");
+    Util.addDateTimeProperty(buildParametersToAdd, buildStartTime, "yyyyMMdd", "build.start.date");
+    Util.addDateTimeProperty(buildParametersToAdd, buildStartTime, "HHmmss", "build.start.time");
   }
 
 }
