@@ -22,7 +22,7 @@
 
   <target name="clean" depends="groovyplug.clean"/>
 
-  <target name="deploy">
+  <target name="deploy" depends="dist">
     <deploy.teamcity.plugin name="${plugin.name}" />
   </target>
 </project>

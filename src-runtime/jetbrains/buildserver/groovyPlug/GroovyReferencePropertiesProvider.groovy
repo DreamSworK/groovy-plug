@@ -43,6 +43,7 @@ public class GroovyReferencePropertiesProvider extends AbstractBuildParameterRef
     final Map<String, String> result = new HashMap<String, String>();
     addBuildStartTime(result, build);
     addRunParameters(result, build);
+    addTriggeredBy(result, build);
     return result;
   }
 
@@ -61,4 +62,10 @@ public class GroovyReferencePropertiesProvider extends AbstractBuildParameterRef
     Util.addDateTimeProperty(buildParametersToAdd, buildStartTime, "HHmmss", "build.start.time");
   }
 
+  void addTriggeredBy(HashMap<String,String> buildParametersToAdd, SBuild build) {
+    if (build.getTriggeredBy().getUser() != null) {
+      buildParametersToAdd.put("build.triggeredBy.username", build.getTriggeredBy().getUser().getUsername());
+    }
+    buildParametersToAdd.put("build.triggeredBy", build.getTriggeredBy().getAsString());
+  }
 }
