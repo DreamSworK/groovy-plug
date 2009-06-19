@@ -63,21 +63,20 @@ public class GroovyScriptsPreparer {
     final String resourceFile = sourceDir + "/" + fileName;
     final File targetFile = new File(targetDir + "/" + fileName);
     final File targetOriginalFile = new File(targetDir + "/" + fileName + ".dist");
-    if (targetFile.exists()) {
-      if (!areSame(targetFile, targetOriginalFile)) {
-        updateFile(resourceFile, targetOriginalFile);
-        LOG.info("The file " + targetFile.getAbsolutePath() + " is modified since original, updated original copy only.");
-      }
-    } else {
-      updateFile(resourceFile, targetFile);
+    if (targetFile.exists() && areDifferent(targetFile, targetOriginalFile)) {
       updateFile(resourceFile, targetOriginalFile);
+      LOG.info("The file " + targetFile.getAbsolutePath() + " is modified since original, updated original copy only.");
+      return;
     }
+    LOG.info("Updating files " + targetFile.getAbsolutePath() + ", " + targetOriginalFile.getAbsolutePath()+ " from distribution.");
+    updateFile(resourceFile, targetFile);
+    updateFile(resourceFile, targetOriginalFile);
   }
 
-  private boolean areSame(File file1, File file2) {
-    return (file1.exists() == file2.exists()) &&
-           ((file2.lastModified() - file1.lastModified()) < 1000) &&
-           (file1.length() == file2.length());
+  private boolean areDifferent(File file1, File file2) {
+    return (file1.exists() != file2.exists()) ||
+           ((file2.lastModified() - file1.lastModified()) >= 1000) ||
+           (file1.length() != file2.length());
   }
 
   private void updateFile(String resourceFile, File targetFile) {
