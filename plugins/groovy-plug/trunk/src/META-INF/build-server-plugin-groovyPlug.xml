@@ -26,13 +26,18 @@
 
 
 
+  <bean id="dataUtil" class="jetbrains.buildserver.groovyPlug.DataUtil">
+    <property name="vcsModificationHistory" ref="dbVcsModificationHistory"/>
+  </bean>
+
   <lang:groovy id="groovyPropertyProvider" refresh-check-delay="5000"
                script-source="file:/${groovyplug.dir}/GroovyPropertyProvider.groovy">
-    <lang:property name="vcsModificationHistory" ref="dbVcsModificationHistory"/>
+    <lang:property name="dataProvider" ref="dataUtil"/>
   </lang:groovy>
 
   <lang:groovy id="groovyReferencePropertyProvider" refresh-check-delay="5000"
                script-source="file:/${groovyplug.dir}/GroovyReferencePropertiesProvider.groovy">
+    <lang:property name="dataProvider" ref="dataUtil"/>
   </lang:groovy>
 
   <lang:groovy id="buildResourcesLock" refresh-check-delay="5000"
