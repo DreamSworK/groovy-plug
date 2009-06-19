@@ -37,8 +37,7 @@ import jetbrains.buildServer.vcs.SVcsRoot
 public class GroovyPropertyProvider implements ParametersPreprocessor {
   private static final Logger LOG = Logger.getInstance(GroovyPropertyProvider.class.getName());
 
-  VcsModificationHistory vcsModificationHistory;
-  ServerExtensionHolder extensionHolder;
+  DataUtil dataProvider;
 
   GroovyPropertyProvider() {
     LOG.info("GroovyPropertyProvider initialized.");
@@ -65,16 +64,8 @@ public class GroovyPropertyProvider implements ParametersPreprocessor {
     LOG.debug(buildParamsToAdd.size() + " parameters added.");
   }
 
-  @Nullable SVcsModification getLastModification(SBuild build) {
-    Long modificationId = build.getBuildPromotion().getLastModificationId();
-    if (modificationId == null || modificationId == -1) {
-      return null;
-    }
-    return vcsModificationHistory.findChangeById(modificationId);
-  }
-
   void addLastModification(Map<java.lang.String, java.lang.String> buildParametersToAdd, SRunningBuild build) {
-    SVcsModification lastModification = getLastModification(build);
+    SVcsModification lastModification = dataProvider.getLastModification(build);
     if (lastModification != null) {
       Date lastChangeDate = lastModification.getVcsDate();
       Util.addDateTimeProperty(buildParametersToAdd, lastChangeDate, "yyyyMMdd'T'HHmmssZ", "build.lastChange.time", "BUILD_VCS_LASTCHANGE_TIMESTAMP");
@@ -87,32 +78,14 @@ public class GroovyPropertyProvider implements ParametersPreprocessor {
     Util.addDateTimeProperty(buildParametersToAdd, buildStartTime, "HHmmss", "build.start.time", "BUILD_START_TIME");
   }
 
-  void addLastModificationsRevisions(HashMap<java.lang.String, java.lang.String> buildParametersToAdd, SRunningBuild build) {
-    final List<VcsRootEntry> rootEntries = build.getVcsRootEntries();
-    final Map<SVcsRoot, String> rootVersions = new HashMap<SVcsRoot, String>();
-
-    List<SVcsModification> modifications = vcsModificationHistory.getAllModifications(build.getBuildType());
-    int toFill = rootEntries.size();
-
-    SVcsModification lastModification = getLastModification(build);
-    for (SVcsModification modification: modifications) {
-      if (modification <= lastModification) {
-        String version = modification.getDisplayVersion();
-        if (rootVersions.get(modification.getVcsRoot()) == null && version != null) {
-          rootVersions.put(modification.getVcsRoot(), version);
-          --toFill;
-        }
-        if (toFill == 0) {
-          break
-        }
-      }
-    }
+  void addLastModificationsRevisions(Map<String, String> buildParametersToAdd, SRunningBuild build) {
+    final Map<SVcsRoot, String> rootVersions = dataProvider.getLastModificationsRevisions(build);
 
     for (Map.Entry<SVcsRoot, String> versionEntry: rootVersions.entrySet()) {
       String name = jetbrains.buildServer.util.StringUtil.replaceNonAlphaNumericChars(versionEntry.getKey().getName(), (char) '_');
       Util.addProperty(buildParametersToAdd, "build.vcs.lastIncluded.revision." + name, "BUILD_VCS_LASTINCLUDED_REVISION_" + name, versionEntry.getValue())
     }
-    if (rootEntries.size() == 1 && rootVersions.size() == 1) {
+    if (build.getVcsRootEntries().size() == 1 && rootVersions.size() == 1) {
       String version = rootVersions.entrySet().iterator().next().getValue();
       if (version != null) {
         Util.addProperty(buildParametersToAdd, "build.vcs.lastIncluided.revision", "BUILD_VCS_LASTINCLUDED_REVISION", version)

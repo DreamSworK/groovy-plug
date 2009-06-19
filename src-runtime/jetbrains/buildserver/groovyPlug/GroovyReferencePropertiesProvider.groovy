@@ -25,6 +25,14 @@ import org.jetbrains.annotations.NotNull;
 import java.util.Map;
 import java.util.HashMap;
 import java.util.Date;
+import java.util.List;
+
+import jetbrains.buildServer.vcs.VcsRootEntry;
+import jetbrains.buildServer.vcs.SVcsRoot;
+import jetbrains.buildServer.vcs.SVcsModification;
+import jetbrains.buildServer.vcs.VcsModificationHistory;
+import jetbrains.buildserver.groovyPlug.Util;
+import org.jetbrains.annotations.Nullable;
 
 /**
  * @author Yegor.Yarko
@@ -33,6 +41,8 @@ import java.util.Date;
 public class GroovyReferencePropertiesProvider extends AbstractBuildParameterReferencesProvider {
   private static final Logger LOG = Logger.getInstance(GroovyReferencePropertiesProvider.class.getName());
 
+  DataUtil dataProvider;
+
   GroovyReferencePropertiesProvider() {
     LOG.info("GroovyReferencePropertiesProvider initialized.");
   }
@@ -40,10 +50,12 @@ public class GroovyReferencePropertiesProvider extends AbstractBuildParameterRef
   @NotNull
   @Override
   public Map<String, String> getParameters(@NotNull SBuild build) {
+    LOG.debug("Processing build: " + build);
     final Map<String, String> result = new HashMap<String, String>();
     addBuildStartTime(result, build);
     addRunParameters(result, build);
     addTriggeredBy(result, build);
+    addLastModificationsRevisions(result, build);
     return result;
   }
 
@@ -68,4 +80,19 @@ public class GroovyReferencePropertiesProvider extends AbstractBuildParameterRef
     }
     buildParametersToAdd.put("build.triggeredBy", build.getTriggeredBy().getAsString());
   }
+
+ void addLastModificationsRevisions(Map<String, String> buildParametersToAdd, SBuild build) {
+   final Map<SVcsRoot, String> rootVersions = dataProvider.getLastModificationsRevisions(build);
+
+   for (Map.Entry<SVcsRoot, String> versionEntry: rootVersions.entrySet()) {
+     String name = jetbrains.buildServer.util.StringUtil.replaceNonAlphaNumericChars(versionEntry.getKey().getName(), (char) '_');
+     buildParametersToAdd.put("build.vcs.lastIncluded.revision." + name, versionEntry.getValue());
+   }
+   if (build.getVcsRootEntries().size() == 1 && rootVersions.size() == 1) {
+     String version = rootVersions.entrySet().iterator().next().getValue();
+     if (version != null) {
+       buildParametersToAdd.put("build.vcs.lastIncluded.revision", version);
+     }
+   }
+ }
 }
