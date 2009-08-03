@@ -31,21 +31,21 @@
   </bean>
 
   <lang:groovy id="groovyPropertyProvider" refresh-check-delay="5000"
-               script-source="file:/${groovyplug.dir}/GroovyPropertyProvider.groovy">
+               script-source="file://${groovyplug.dir}/GroovyPropertyProvider.groovy">
     <lang:property name="dataProvider" ref="dataUtil"/>
   </lang:groovy>
 
   <lang:groovy id="groovyReferencePropertyProvider" refresh-check-delay="5000"
-               script-source="file:/${groovyplug.dir}/GroovyReferencePropertiesProvider.groovy">
+               script-source="file://${groovyplug.dir}/GroovyReferencePropertiesProvider.groovy">
     <lang:property name="dataProvider" ref="dataUtil"/>
   </lang:groovy>
 
   <lang:groovy id="buildResourcesLock" refresh-check-delay="5000"
-               script-source="file:/${groovyplug.dir}/BuildResourcesLock.groovy">
+               script-source="file://${groovyplug.dir}/BuildResourcesLock.groovy">
   </lang:groovy>
 
   <lang:groovy id="buildServerListener" refresh-check-delay="5000"
-               script-source="file:/${groovyplug.dir}/GroovyBuildServerListener.groovy">
+               script-source="file://${groovyplug.dir}/GroovyBuildServerListener.groovy">
   </lang:groovy>
 
 
