@@ -56,20 +56,23 @@ public class DataUtil {
     List<SVcsModification> modifications = vcsModificationHistory.getAllModifications(build.getBuildType());
     int toFill = rootEntries.size();
     SVcsModification lastModification = getLastModification(build);
-    LOG.debug("Searching for last included revisions. Root entries number: " + toFill + ",  last modification: " + lastModification +
-              ", total modifications: " + modifications.size());
-
-    for (SVcsModification modification : modifications) {
-      if (modification.compareTo(lastModification) <= 0) {
-        String version = modification.getDisplayVersion();
-        if (rootVersions.get(modification.getVcsRoot()) == null && version != null) {
-          rootVersions.put(modification.getVcsRoot(), version);
-          --toFill;
-        }
-        if (toFill == 0) {
-          break;
+    if (lastModification != null) {
+      LOG.debug("Searching for last included revisions. Root entries number: " + toFill + ",  last modification: " + lastModification +
+                ", total modifications: " + modifications.size());
+      for (SVcsModification modification : modifications) {
+        if (modification.compareTo(lastModification) <= 0) {
+          String version = modification.getDisplayVersion();
+          if (rootVersions.get(modification.getVcsRoot()) == null && version != null) {
+            rootVersions.put(modification.getVcsRoot(), version);
+            --toFill;
+          }
+          if (toFill == 0) {
+            break;
+          }
         }
       }
+    } else {
+      LOG.debug("No modification is associated with the build " + build + ", no VCS versions are added");
     }
 
     return rootVersions;
