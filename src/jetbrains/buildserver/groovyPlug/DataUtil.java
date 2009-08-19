@@ -35,7 +35,7 @@ import org.jetbrains.annotations.NotNull;
  *         Date: 19.06.2009
  */
 public class DataUtil {
-  private static final Logger LOG = Logger.getInstance(GroovyReferencePropertiesProvider.class.getName());
+  private static final Logger LOG = Logger.getInstance(DataUtil.class.getName());
 
   VcsModificationHistory vcsModificationHistory;
 
@@ -72,7 +72,7 @@ public class DataUtil {
         }
       }
     } else {
-      LOG.debug("No modification is associated with the build " + build + ", no VCS versions are added");
+      LOG.debug("No modification is associated with the build " + build + ", no VCS versions found");
     }
 
     return rootVersions;
