@@ -89,9 +89,9 @@ public class LockManager {
     }
   }
 
-  boolean lock(Collection<Lock> locks, BuildPromotionInfo build) {
-    for (Lock lock: locks) {
-      lock(lock, build);
+  void lock(Collection<Lock> locks, BuildPromotionInfo build) {
+    for (Lock l: locks) {
+      lock(l, build);
     }
   }
 
