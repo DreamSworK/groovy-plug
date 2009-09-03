@@ -70,8 +70,8 @@
   <path id="library.groovy.classpath">
     <pathelement location="${basedir}/lib/antlr-2.7.7.jar"/>
     <pathelement location="${basedir}/lib/asm-2.2.3.jar"/>
-    <pathelement location="${basedir}/lib/commons-cli-1.0.jar"/>
-    <pathelement location="${basedir}/lib/groovy-1.6.0.jar"/>
+    <pathelement location="${basedir}/lib/commons-cli-1.2.jar"/>
+    <pathelement location="${basedir}/lib/groovy-1.6.4.jar"/>
   </path>
   
   <path id="library.teamcity_open_api_common.classpath">
@@ -93,6 +93,10 @@
   
   
   <!-- Application Server Libraries -->
+  
+  <!-- Custom Compiler Taskdefs -->
+  <property name="grooovyc.task.sdk" value="library.groovy.classpath"/>
+  <taskdef name="groovyc" classname="org.codehaus.groovy.ant.Groovyc" classpathref="${grooovyc.task.sdk}"/>
   
   <!-- Modules -->
   
@@ -149,13 +153,21 @@
   
   <target name="compile.module.groovyplug.production" description="Compile module GroovyPlug; production classes">
     <mkdir dir="${groovyplug.output.dir}"/>
-    <javac2 destdir="${groovyplug.output.dir}" debug="${compiler.debug}" nowarn="${compiler.generate.no.warnings}" memorymaximumsize="${compiler.max.memory}" fork="true">
+    <groovyc destdir="${groovyplug.output.dir}" fork="yes">
+      <src refid="groovyplug.module.sourcepath"/>
+      <classpath refid="groovyplug.module.classpath"/>
+      <patternset refid="excluded.from.compilation.groovyplug"/>
+      <javac debug="${compiler.debug}">
+        <compilerarg line="${compiler.args.groovyplug}"/>
+      </javac>
+    </groovyc>
+    <instrumentIdeaExtensions destdir="${groovyplug.output.dir}">
       <compilerarg line="${compiler.args.groovyplug}"/>
       <bootclasspath refid="groovyplug.module.bootclasspath"/>
       <classpath refid="groovyplug.module.classpath"/>
       <src refid="groovyplug.module.sourcepath"/>
       <patternset refid="excluded.from.compilation.groovyplug"/>
-    </javac2>
+    </instrumentIdeaExtensions>
     
     <copy todir="${groovyplug.output.dir}">
       <fileset dir="${module.groovyplug.basedir}/src">
@@ -176,87 +188,11 @@
     <delete dir="${groovyplug.testoutput.dir}"/>
   </target>
   
-  
-  <!-- Module testOnly -->
-  
-  <dirname property="module.testonly.basedir" file="${ant.file}"/>
-  
-  
-  
-  <property name="compiler.args.testonly" value="${compiler.args}"/>
-  
-  <property name="testonly.output.dir" value="${module.testonly.basedir}/out/production/testOnly"/>
-  <property name="testonly.testoutput.dir" value="${module.testonly.basedir}/out/test/testOnly"/>
-  
-  <path id="testonly.module.bootclasspath">
-    <!-- Paths to be included in compilation bootclasspath -->
-  </path>
-  
-  <path id="testonly.module.classpath">
-    <path refid="library.teamcity_open_api_server.classpath"/>
-    <path refid="library.teamcity_open_api_common.classpath"/>
-    <path refid="library.teamcity_third-party.classpath"/>
-    <pathelement location="${groovyplug.output.dir}"/>
-    <pathelement location="${groovyplug.testoutput.dir}"/>
-  </path>
-  
-  <path id="testonly.runtime.module.classpath">
-    <pathelement location="${testonly.output.dir}"/>
-    <pathelement location="${testonly.testoutput.dir}"/>
-    <path refid="library.teamcity_open_api_server.classpath"/>
-    <path refid="library.teamcity_open_api_common.classpath"/>
-    <path refid="library.teamcity_third-party.classpath"/>
-    <path refid="groovyplug.runtime.module.classpath"/>
-  </path>
-  
-  
-  <patternset id="excluded.from.module.testonly">
-    <patternset refid="ignored.files"/>
-  </patternset>
-  
-  <patternset id="excluded.from.compilation.testonly">
-    <patternset refid="excluded.from.module.testonly"/>
-  </patternset>
-  
-  <path id="testonly.module.sourcepath">
-    <dirset dir="${module.testonly.basedir}/testOnly">
-      <include name="src"/>
-    </dirset>
-  </path>
-  
-  
-  <target name="compile.module.testonly" depends="compile.module.testonly.production,compile.module.testonly.tests" description="Compile module testOnly"/>
-  
-  <target name="compile.module.testonly.production" depends="compile.module.groovyplug" description="Compile module testOnly; production classes">
-    <mkdir dir="${testonly.output.dir}"/>
-    <javac2 destdir="${testonly.output.dir}" debug="${compiler.debug}" nowarn="${compiler.generate.no.warnings}" memorymaximumsize="${compiler.max.memory}" fork="true">
-      <compilerarg line="${compiler.args.testonly}"/>
-      <bootclasspath refid="testonly.module.bootclasspath"/>
-      <classpath refid="testonly.module.classpath"/>
-      <src refid="testonly.module.sourcepath"/>
-      <patternset refid="excluded.from.compilation.testonly"/>
-    </javac2>
-    
-    <copy todir="${testonly.output.dir}">
-      <fileset dir="${module.testonly.basedir}/testOnly/src">
-        <patternset refid="compiler.resources"/>
-        <type type="file"/>
-      </fileset>
-    </copy>
-  </target>
-  
-  <target name="compile.module.testonly.tests" depends="compile.module.testonly.production" description="compile module testOnly; test classes" unless="skip.tests"/>
-  
-  <target name="clean.module.testonly" description="cleanup module">
-    <delete dir="${testonly.output.dir}"/>
-    <delete dir="${testonly.testoutput.dir}"/>
-  </target>
-  
   <target name="init" description="Build initialization">
     <!-- Perform any build initialization in this target -->
   </target>
   
-  <target name="clean" depends="clean.module.groovyplug, clean.module.testonly" description="cleanup all"/>
+  <target name="clean" depends="clean.module.groovyplug" description="cleanup all"/>
   
   <target name="init.artifacts">
     <property name="artifacts.temp.dir" value="${basedir}/artifactsTemp"/>
@@ -269,5 +205,5 @@
     <delete dir="${artifacts.temp.dir}"/>
   </target>
   
-  <target name="all" depends="init, clean, compile.module.groovyplug, compile.module.testonly, build.all.artifacts" description="build all"/>
+  <target name="all" depends="init, clean, compile.module.groovyplug, build.all.artifacts" description="build all"/>
 </project>
