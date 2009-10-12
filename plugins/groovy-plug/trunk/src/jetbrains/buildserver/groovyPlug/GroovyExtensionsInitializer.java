@@ -17,7 +17,7 @@
 package jetbrains.buildserver.groovyPlug;
 
 import jetbrains.buildServer.serverSide.*;
-import jetbrains.buildServer.serverSide.parameters.BuildParameterReferencesProvider;
+import jetbrains.buildServer.serverSide.parameters.BuildParametersProvider;
 
 /**
  * @author Yegor.Yarko
@@ -29,7 +29,7 @@ public class GroovyExtensionsInitializer {
   private SBuildServer myServer;
 
   ParametersPreprocessor myPropertyProvider;
-  BuildParameterReferencesProvider myReferencePropertyProvider;
+  BuildParametersProvider myReferencePropertyProvider;
   BuildServerListener myBuildServerListener;
   DataCleaner myBuildCleaner;
 
@@ -42,7 +42,7 @@ public class GroovyExtensionsInitializer {
     this.myPropertyProvider = myPropertyProvider;
   }
 
-  public void setReferencePropertyProvider(BuildParameterReferencesProvider referencePropertyProvider) {
+  public void setReferencePropertyProvider(BuildParametersProvider referencePropertyProvider) {
     this.myReferencePropertyProvider = referencePropertyProvider;
   }
 
@@ -60,7 +60,7 @@ public class GroovyExtensionsInitializer {
     }
     if (myReferencePropertyProvider != null) {
       myExtensionsHolder
-        .registerExtension(BuildParameterReferencesProvider.class, "myReferencePropertyProvider", myReferencePropertyProvider);
+        .registerExtension(BuildParametersProvider.class, "myReferencePropertyProvider", myReferencePropertyProvider);
     }
     if (myBuildServerListener != null) myServer.addListener(myBuildServerListener);
     if (myBuildCleaner != null) myServer.registerExtension(DataCleaner.class, "groovyBuildCleaner", myBuildCleaner);
