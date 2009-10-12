@@ -1,0 +1,64 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns="http://www.springframework.org/schema/beans"
+       xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+       xmlns:lang="http://www.springframework.org/schema/lang"
+       xsi:schemaLocation="http://www.springframework.org/schema/beans
+                           http://www.springframework.org/schema/beans/spring-beans-2.0.xsd
+                           http://www.springframework.org/schema/lang
+                           http://www.springframework.org/schema/lang/spring-lang-2.0.xsd"
+       default-autowire="constructor">
+
+  <bean id="scriptPreparer" class="jetbrains.buildserver.groovyPlug.GroovyScriptsPreparer" init-method="init">
+    <property name="sourceResourceDir" value="/jetbrains/buildserver/groovyPlug"/>
+    <property name="targetDirUnderConfig" value="__groovyPlug__"/>
+    <property name="fileNames" value="GroovyPropertyProvider.groovy,GroovyReferencePropertiesProvider.groovy,BuildResourcesLock.groovy,GroovyBuildServerListener.groovy,GroovyBuildCleaner.groovy"/>
+  </bean>
+
+  <!-- Dependency on scriptPreparer is needed to ensure it is initialized before groovy bean definition tries to be parsed -->
+  <bean id="customProps" class="jetbrains.buildserver.groovyPlug.CustomSubstitutionProperties" depends-on="scriptPreparer">
+    <property name="groovyPlugScriptsDirPropertyName" value="groovyplug.dir"/>
+    <property name="groovyPlugScriptsDir" value="__groovyPlug__"/>
+  </bean>
+
+  <bean class="org.springframework.beans.factory.config.PropertyPlaceholderConfigurer">
+    <property name="properties" ref="customProps"/>
+  </bean>
+
+
+
+  <bean id="dataUtil" class="jetbrains.buildserver.groovyPlug.DataUtil">
+    <property name="vcsModificationHistory" ref="dbVcsModificationHistory"/>
+  </bean>
+
+  <lang:groovy id="groovyPropertyProvider" refresh-check-delay="5000"
+               script-source="file://${groovyplug.dir}/GroovyPropertyProvider.groovy">
+    <lang:property name="dataProvider" ref="dataUtil"/>
+  </lang:groovy>
+
+  <lang:groovy id="groovyReferencePropertyProvider" refresh-check-delay="5000"
+               script-source="file://${groovyplug.dir}/GroovyReferencePropertiesProvider.groovy">
+    <lang:property name="dataProvider" ref="dataUtil"/>
+  </lang:groovy>
+
+  <lang:groovy id="buildResourcesLock" refresh-check-delay="5000"
+               script-source="file://${groovyplug.dir}/BuildResourcesLock.groovy">
+  </lang:groovy>
+
+  <lang:groovy id="buildServerListener" refresh-check-delay="5000"
+               script-source="file://${groovyplug.dir}/GroovyBuildServerListener.groovy">
+  </lang:groovy>
+
+  <lang:groovy id="buildCleaner" refresh-check-delay="5000"
+               script-source="file://${groovyplug.dir}/GroovybuildCleaner.groovy">
+    <lang:property name="server" ref="buildServer"/>
+  </lang:groovy>
+
+
+  <bean class="jetbrains.buildserver.groovyPlug.GroovyExtensionsInitializer" init-method="init">
+    <property name="propertyProvider" ref="groovyPropertyProvider"/>
+    <property name="referencePropertyProvider" ref="groovyReferencePropertyProvider"/>
+    <property name="buildServerListener" ref="buildServerListener"/>
+    <property name="buildCleaner" ref="buildCleaner"/>
+  </bean>
+  
+</beans>
