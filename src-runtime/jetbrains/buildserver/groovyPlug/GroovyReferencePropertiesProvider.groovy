@@ -16,7 +16,7 @@
 package jetbrains.buildserver.groovyPlug;
 
 import com.intellij.openapi.diagnostic.Logger;
-import jetbrains.buildServer.serverSide.parameters.AbstractBuildParameterReferencesProvider;
+import jetbrains.buildServer.serverSide.parameters.AbstractBuildParametersProvider;
 import jetbrains.buildServer.serverSide.SBuild;
 import jetbrains.buildServer.serverSide.SRunningBuild;
 import jetbrains.buildServer.serverSide.SBuildType;
@@ -38,7 +38,7 @@ import org.jetbrains.annotations.Nullable;
  * @author Yegor.Yarko
  *         Date: 04.03.2009
  */
-public class GroovyReferencePropertiesProvider extends AbstractBuildParameterReferencesProvider {
+public class GroovyReferencePropertiesProvider extends AbstractBuildParametersProvider {
   private static final Logger LOG = Logger.getInstance(GroovyReferencePropertiesProvider.class.getName());
 
   DataUtil dataProvider;
