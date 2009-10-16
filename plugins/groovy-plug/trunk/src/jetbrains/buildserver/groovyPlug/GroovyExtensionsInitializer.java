@@ -38,11 +38,11 @@ public class GroovyExtensionsInitializer {
     this.myServer = server;
   }
 
-  public void setPropertyProvider(ParametersPreprocessor myPropertyProvider) {
+  public void setParametersPreprocessor(ParametersPreprocessor myPropertyProvider) {
     this.myPropertyProvider = myPropertyProvider;
   }
 
-  public void setReferencePropertyProvider(BuildParametersProvider referencePropertyProvider) {
+  public void setPropertiesProvider(BuildParametersProvider referencePropertyProvider) {
     this.myReferencePropertyProvider = referencePropertyProvider;
   }
 
