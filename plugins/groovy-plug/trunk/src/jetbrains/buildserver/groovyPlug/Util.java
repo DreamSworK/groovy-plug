@@ -16,6 +16,8 @@
 
 package jetbrains.buildserver.groovyPlug;
 
+import com.intellij.openapi.diagnostic.Logger;
+import jetbrains.buildServer.util.StringUtil;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
@@ -28,6 +30,8 @@ import java.text.SimpleDateFormat;
  *         Date: 04.03.2009
  */
 public class Util {
+  private static final Logger LOG = Logger.getInstance(Util.class.getName());
+
   public static void addDateTimeProperty(Map<String, String> buildParametersToAdd,
                                          Date date,
                                          String dateFormat,
@@ -43,6 +47,37 @@ public class Util {
                                  @NotNull final String value) {
     if (systemParamName != null) buildParametersToAdd.put("system." + systemParamName, value);
     if (envParamName != null) buildParametersToAdd.put("env." + envParamName, value);
+  }
+
+  public static void addProperty(@NotNull final Map<String, String> buildParametersToAdd,
+                                 @Nullable final String systemParamName,
+                                 @Nullable final String envParamName,
+                                 @Nullable final String configParamName,
+                                 @NotNull final String value) {
+    if (systemParamName != null) buildParametersToAdd.put("system." + systemParamName, value);
+    if (envParamName != null) {
+      buildParametersToAdd
+        .put("env." + jetbrains.buildServer.util.StringUtil.replaceNonAlphaNumericChars(envParamName.toUpperCase(), '_'), value);
+    }
+    if (configParamName != null) buildParametersToAdd.put(configParamName, value);
+  }
+
+  public static void addProperty(@NotNull final Map<String, String> buildParametersToAdd,
+                                 @NotNull final String name,
+                                 @NotNull final String value,
+                                 final boolean addSystem,
+                                 final boolean addEnvironment,
+                                 final boolean addConfigParam) {
+    LOG.debug("Adding parameter '" + name + "' with value =" + value + " to " +
+              (addSystem ? "system" : "") +
+              (addEnvironment ? "environment" : "") +
+              (addConfigParam ? "config" : ""));
+    if (StringUtil.isEmpty(name)) return;
+    if (addSystem) buildParametersToAdd.put("system." + name, value);
+    if (addEnvironment) {
+      buildParametersToAdd.put("env." + jetbrains.buildServer.util.StringUtil.replaceNonAlphaNumericChars(name.toUpperCase(), '_'), value);
+    }
+    if (addConfigParam) buildParametersToAdd.put(name, value);
   }
 
   public static void addDateTimeProperty(Map<String, String> buildParametersToAdd,

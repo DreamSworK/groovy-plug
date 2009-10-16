@@ -49,9 +49,9 @@ public class DataUtil {
   }
 
   @NotNull
-  Map<SVcsRoot, String> getLastModificationsRevisions(SBuild build) {
+  Map<SVcsRoot, SVcsModification> getLastModificationsRevisions(SBuild build) {
     final List<VcsRootEntry> rootEntries = build.getVcsRootEntries();
-    final Map<SVcsRoot, String> rootVersions = new HashMap<SVcsRoot, String>();
+    final Map<SVcsRoot, SVcsModification> rootVersions = new HashMap<SVcsRoot, SVcsModification>();
 
     List<SVcsModification> modifications = vcsModificationHistory.getAllModifications(build.getBuildType());
     int toFill = rootEntries.size();
@@ -61,9 +61,8 @@ public class DataUtil {
                 ", total modifications: " + modifications.size());
       for (SVcsModification modification : modifications) {
         if (modification.compareTo(lastModification) <= 0) {
-          String version = modification.getDisplayVersion();
-          if (rootVersions.get(modification.getVcsRoot()) == null && version != null) {
-            rootVersions.put(modification.getVcsRoot(), version);
+          if (rootVersions.get(modification.getVcsRoot()) == null) {
+            rootVersions.put(modification.getVcsRoot(), modification);
             --toFill;
           }
           if (toFill == 0) {
