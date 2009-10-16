@@ -44,6 +44,7 @@ public class GroovyPropertyProvider implements ParametersPreprocessor {
   }
 
   public void fixRunBuildParameters(SRunningBuild build, Map<String, String> runParameters, Map<String, String> buildParams) {
+/*
     LOG.debug("GroovyPropertyProvider asked for properties for build (buildId=" + build.buildId + ")");
     Map<String, String> buildParamsToAdd = new HashMap<String, String>();
 
@@ -52,6 +53,7 @@ public class GroovyPropertyProvider implements ParametersPreprocessor {
     addLastModificationsRevisions(buildParamsToAdd, build);
 
     addBuildParameters(buildParamsToAdd, buildParams)
+*/
   }
 
   private def addBuildParameters(HashMap<String, String> buildParamsToAdd, Map<String, String> resultingBuildParams) {
