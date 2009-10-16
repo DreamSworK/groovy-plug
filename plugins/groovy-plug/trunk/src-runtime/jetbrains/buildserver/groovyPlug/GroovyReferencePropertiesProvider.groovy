@@ -49,7 +49,7 @@ public class GroovyReferencePropertiesProvider extends AbstractBuildParametersPr
 
   @NotNull
   @Override
-  public Map<String, String> getParameters(@NotNull SBuild build) {
+  public Map<String, String> getParameters(@NotNull SBuild build, final boolean emulationMode) {
     LOG.debug("Processing build: " + build);
     final Map<String, String> result = new HashMap<String, String>();
     addBuildStartTime(result, build);
