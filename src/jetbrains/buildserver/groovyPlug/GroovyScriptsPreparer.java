@@ -82,7 +82,7 @@ public class GroovyScriptsPreparer {
   private void updateFile(String resourceFile, File targetFile) {
     if (targetFile.exists()) {
       if (!targetFile.delete()) {
-        LOG.warn("Cannot save original file to file " + targetFile.getAbsolutePath() + " bacause the file cannot be deleted.");
+        LOG.warn("Cannot save original file to file " + targetFile.getAbsolutePath() + " because the file cannot be deleted.");
         return;
       }
     }
@@ -90,10 +90,10 @@ public class GroovyScriptsPreparer {
   }
 
   private void copyResource(String resourceFile, File targetFile) {
-    String operation = targetFile.exists() ? "Updated" : "Created";
+    boolean fileExisted = targetFile.exists();
     FileUtil.copyResource(getClass(), resourceFile, targetFile);
     if (targetFile.exists()) {
-      LOG.info(operation + " file: " + targetFile.getAbsolutePath());
+      LOG.debug((fileExisted ? "Updated" : "Created") + " file: " + targetFile.getAbsolutePath());
     } else {
       LOG.warn("A required file is missing: " + targetFile.getAbsolutePath() + ". Probably missing resource:" + resourceFile);
     }
