@@ -49,7 +49,7 @@
   </lang:groovy>
 
   <lang:groovy id="buildCleaner" refresh-check-delay="5000"
-               script-source="file://${groovyplug.dir}/GroovybuildCleaner.groovy">
+               script-source="file://${groovyplug.dir}/GroovyBuildCleaner.groovy">
     <lang:property name="server" ref="buildServer"/>
   </lang:groovy>
 
