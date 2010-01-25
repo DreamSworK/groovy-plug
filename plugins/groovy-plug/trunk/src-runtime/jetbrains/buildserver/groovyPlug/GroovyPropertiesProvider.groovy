@@ -15,21 +15,18 @@
  */
 package jetbrains.buildserver.groovyPlug;
 
-import com.intellij.openapi.diagnostic.Logger;
-import jetbrains.buildServer.serverSide.parameters.AbstractBuildParametersProvider;
-import jetbrains.buildServer.serverSide.SBuild;
-import jetbrains.buildServer.serverSide.SRunningBuild;
-import jetbrains.buildServer.serverSide.SBuildType;
-import org.jetbrains.annotations.NotNull;
 
-
-import jetbrains.buildServer.vcs.SVcsRoot;
-import jetbrains.buildServer.vcs.SVcsModification;
-
-
+import com.intellij.openapi.diagnostic.Logger
 import java.text.SimpleDateFormat
+import jetbrains.buildServer.serverSide.SBuild
+import jetbrains.buildServer.serverSide.SBuildType
+import jetbrains.buildServer.serverSide.parameters.AbstractBuildParametersProvider
 import jetbrains.buildServer.util.StringUtil
-import org.jetbrains.annotations.Nullable;
+import jetbrains.buildServer.vcs.SVcsModification
+import jetbrains.buildServer.vcs.SVcsRoot
+import jetbrains.buildServer.vcs.VcsRootEntry
+import org.jetbrains.annotations.NotNull
+import org.jetbrains.annotations.Nullable
 
 /**
  * @author Yegor.Yarko
@@ -86,21 +83,37 @@ public class GroovyPropertiesProvider extends AbstractBuildParametersProvider {
   void addLastModificationsRevisions(@NotNull final BuildParameters parameters, SBuild build) {
     final Map<SVcsRoot, SVcsModification> rootVersions = dataProvider.getLastModificationsRevisions(build);
 
-    for (Map.Entry<SVcsRoot, SVcsModification> versionEntry: rootVersions.entrySet()) {
-      addModificationParams(parameters, versionEntry.getKey(), versionEntry.getValue());
+    for (VcsRootEntry rootEntry: build.getVcsRootEntries()){
+      SVcsRoot root = (SVcsRoot)rootEntry.getVcsRoot()
+      addModificationParams(parameters, root, rootVersions.get(root));
     }
-    if (build.getVcsRootEntries().size() == 1 && rootVersions.size() == 1) {
-      addModificationParams(parameters, null, rootVersions.entrySet().iterator().next().getValue());
+    if (build.getVcsRootEntries().size() == 1) {
+      if (rootVersions.size() == 1) {
+        addModificationParams(parameters, null, rootVersions.entrySet().iterator().next().getValue());
+      }else{
+        addModificationParams(parameters, null, null);
+      }
     }
   }
 
-  private def addModificationParams(BuildParameters parameters, @Nullable SVcsRoot root, SVcsModification modification) {
+  private def addModificationParams(BuildParameters parameters, @Nullable SVcsRoot root, @Nullable SVcsModification modification) {
     String suffix = root == null ? "" : "." + StringUtil.replaceNonAlphaNumericChars(root.getName(), (char) '_');
     parameters.addEnvAndSystem("build.vcs.lastIncluded.revision" + suffix, getVersion(modification));
-    parameters.addEnvAndSystem("build.vcs.lastIncluded.timestamp" + suffix, (new SimpleDateFormat("yyyyMMdd'T'HHmmssZ")).format(modification.getVcsDate()))
+    parameters.addEnvAndSystem("build.vcs.lastIncluded.timestamp" + suffix, getDate(modification))
   }
 
-  String getVersion(SVcsModification modification) {
+  private @NotNull String getDate(@Nullable SVcsModification modification) {
+    if (modification != null) {
+      return (new SimpleDateFormat("yyyyMMdd'T'HHmmssZ")).format(modification.getVcsDate())
+    }else{
+      "";
+    }
+  }
+
+  private @NotNull  String getVersion(@Nullable SVcsModification modification) {
+    if (modification == null){
+      return "";
+    }
     String version = modification.getDisplayVersion()
     if (version == null) {
       version = modification.getVersion();
