@@ -49,7 +49,7 @@ public class GroovyPropertiesProvider extends AbstractBuildParametersProvider {
     try {
       addBuildStartTime(parameters, build);
       addRunParameters(parameters, build);
-      addTriggeredBy(parameters, build);
+      addTriggeredBy(parameters, build, emulationMode);
       addLastModificationsRevisions(parameters, build);
     } catch (Exception e) {
       LOG.error("Critical error occurred during parameters calculation", e);
@@ -73,9 +73,11 @@ public class GroovyPropertiesProvider extends AbstractBuildParametersProvider {
     parameters.addEnvAndSystem("build.start.time", (new SimpleDateFormat("HHmmss")).format(buildStartTime));
   }
 
-  void addTriggeredBy(@NotNull final BuildParameters parameters, SBuild build) {
+  void addTriggeredBy(@NotNull final BuildParameters parameters, SBuild build, final boolean emulationMode) {
     if (build.getTriggeredBy().getUser() != null) {
       parameters.addConfiguration("build.triggeredBy.username", build.getTriggeredBy().getUser().getUsername());
+    }else if (emulationMode){
+      parameters.addConfiguration("build.triggeredBy.username", "n/a");
     }
     parameters.addConfiguration("build.triggeredBy", build.getTriggeredBy().getAsString());
   }
