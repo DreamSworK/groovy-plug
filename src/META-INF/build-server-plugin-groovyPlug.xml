@@ -11,7 +11,7 @@
   <bean id="scriptPreparer" class="jetbrains.buildserver.groovyPlug.GroovyScriptsPreparer" init-method="init">
     <property name="sourceResourceDir" value="/jetbrains/buildserver/groovyPlug"/>
     <property name="targetDirUnderConfig" value="__groovyPlug__"/>
-    <property name="fileNames" value="GroovyParametersPreprocessor.groovy,GroovyPropertiesProvider.groovy,BuildResourcesLock.groovy,GroovyBuildServerListener.groovy,GroovyBuildCleaner.groovy"/>
+    <property name="fileNames" value="GroovyParametersPreprocessor.groovy,GroovyPropertiesProvider.groovy,BuildResourcesLock.groovy,GroovyBuildServerListener.groovy,GroovyBuildCleaner.groovy,GroovyTemplateProcessor.groovy"/>
   </bean>
 
   <!-- Dependency on scriptPreparer is needed to ensure it is initialized before groovy bean definition tries to be parsed -->
@@ -51,6 +51,10 @@
   <lang:groovy id="buildCleaner" refresh-check-delay="5000"
                script-source="file://${groovyplug.dir}/GroovyBuildCleaner.groovy">
     <lang:property name="server" ref="buildServer"/>
+  </lang:groovy>
+
+  <lang:groovy id="templateProcessor" refresh-check-delay="5000"
+               script-source="file://${groovyplug.dir}/GroovyTemplateProcessor.groovy">
   </lang:groovy>
 
 
