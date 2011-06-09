@@ -16,10 +16,7 @@
 
 package jetbrains.buildserver.groovyPlug;
 
-import jetbrains.buildServer.vcs.SVcsRoot;
-import jetbrains.buildServer.vcs.SVcsModification;
-import jetbrains.buildServer.vcs.VcsRootEntry;
-import jetbrains.buildServer.vcs.VcsModificationHistory;
+import jetbrains.buildServer.vcs.*;
 import jetbrains.buildServer.serverSide.SBuild;
 
 import java.util.Map;
@@ -50,7 +47,7 @@ public class DataUtil {
 
   @NotNull
   Map<SVcsRoot, SVcsModification> getLastModificationsRevisions(SBuild build) {
-    final List<VcsRootEntry> rootEntries = build.getVcsRootEntries();
+    final List<VcsRootInstanceEntry> rootEntries = build.getVcsRootEntries();
     final Map<SVcsRoot, SVcsModification> rootVersions = new HashMap<SVcsRoot, SVcsModification>();
 
     List<SVcsModification> modifications = vcsModificationHistory.getAllModifications(build.getBuildType());
