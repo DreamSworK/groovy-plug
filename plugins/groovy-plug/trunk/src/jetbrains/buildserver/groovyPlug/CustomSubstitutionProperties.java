@@ -17,14 +17,12 @@
 package jetbrains.buildserver.groovyPlug;
 
 import jetbrains.buildServer.serverSide.ServerPaths;
-import jetbrains.buildServer.util.FileUtil;
-
-import java.util.Properties;
-import java.io.File;
-
-import org.springframework.beans.factory.InitializingBean;
 import org.jetbrains.annotations.NotNull;
-import com.intellij.openapi.diagnostic.Logger;
+import org.springframework.beans.factory.InitializingBean;
+
+import java.io.File;
+import java.net.URL;
+import java.util.Properties;
 
 /**
  * @author Yegor.Yarko
@@ -53,7 +51,9 @@ public class CustomSubstitutionProperties extends Properties implements Initiali
   }
 
   public void afterPropertiesSet() throws Exception {
-    final String groovyPlugScriptsDir = new File(myServerPaths.getConfigDir(), myGroovyPlugScriptsDir).getAbsolutePath();
-    setProperty(myGroovyPlugSubDirPropertyName, groovyPlugScriptsDir);
+    final File home = new File(myServerPaths.getConfigDir(), myGroovyPlugScriptsDir).getAbsoluteFile();
+    final URL url = home.toURI().toURL();
+    final String urlString = url.toString();
+    setProperty(myGroovyPlugSubDirPropertyName, urlString);
   }
 }
