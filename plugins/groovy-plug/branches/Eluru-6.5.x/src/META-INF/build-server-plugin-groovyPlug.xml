@@ -31,30 +31,30 @@
   </bean>
 
   <lang:groovy id="groovyParametersPreprocessor" refresh-check-delay="5000"
-               script-source="file://${groovyplug.dir}/GroovyParametersPreprocessor.groovy">
+               script-source="${groovyplug.dir}/GroovyParametersPreprocessor.groovy">
     <lang:property name="dataProvider" ref="dataUtil"/>
   </lang:groovy>
 
   <lang:groovy id="groovyPropertiesProvider" refresh-check-delay="5000"
-               script-source="file://${groovyplug.dir}/GroovyPropertiesProvider.groovy">
+               script-source="${groovyplug.dir}/GroovyPropertiesProvider.groovy">
     <lang:property name="dataProvider" ref="dataUtil"/>
   </lang:groovy>
 
   <lang:groovy id="buildResourcesLock" refresh-check-delay="5000"
-               script-source="file://${groovyplug.dir}/BuildResourcesLock.groovy">
+               script-source="${groovyplug.dir}/BuildResourcesLock.groovy">
   </lang:groovy>
 
   <lang:groovy id="buildServerListener" refresh-check-delay="5000"
-               script-source="file://${groovyplug.dir}/GroovyBuildServerListener.groovy">
+               script-source="${groovyplug.dir}/GroovyBuildServerListener.groovy">
   </lang:groovy>
 
   <lang:groovy id="buildCleaner" refresh-check-delay="5000"
-               script-source="file://${groovyplug.dir}/GroovyBuildCleaner.groovy">
+               script-source="${groovyplug.dir}/GroovyBuildCleaner.groovy">
     <lang:property name="server" ref="buildServer"/>
   </lang:groovy>
 
   <lang:groovy id="templateProcessor" refresh-check-delay="5000"
-               script-source="file://${groovyplug.dir}/GroovyTemplateProcessor.groovy">
+               script-source="${groovyplug.dir}/GroovyTemplateProcessor.groovy">
   </lang:groovy>
 
 
