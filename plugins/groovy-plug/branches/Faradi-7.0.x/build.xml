@@ -1,0 +1,30 @@
+<project name="groovyplug-custom-build" default="dist" basedir=".">
+
+  <property file="build.properties"/>
+  <property name="plugin.name" value="groovyPlug"/>
+
+  <property name="javac2.home" value="${basedir}/lib-compile"/>
+
+  <import file="groovyplug.xml"/>
+  <import file="teamcity-common.xml"/>
+
+  <target name="package">
+    <package.teamcity.plugin name="${plugin.name}" server.output="${groovyplug.output.dir}"/>
+    <!-- Groovy specific -->
+    <delete dir="dist/application_libs" quiet="true"/>
+    <copy todir="dist/application_libs">
+      <fileset dir="lib" excludes="**/.svn/**,commons-cli-*.jar"/>
+    </copy>
+    <echo message="After plugin installation, copy files from 'application_libs' into '&lt;TeamCity home&gt;/webapps/ROOT/WEB-INF/lib' directory"/>
+  </target>
+
+  <target name="dist" depends="check.teamcitydistribution,all,package"/>
+
+  <target name="clean" depends="groovyplug.clean"/>
+
+  <target name="deploy" depends="dist">
+    <deploy.teamcity.plugin name="${plugin.name}" />
+  </target>
+</project>
+
+        
