@@ -16,16 +16,13 @@
 
 package jetbrains.buildserver.groovyPlug;
 
-import jetbrains.buildServer.vcs.*;
-import jetbrains.buildServer.serverSide.SBuild;
-
-import java.util.Map;
-import java.util.List;
-import java.util.HashMap;
-
 import com.intellij.openapi.diagnostic.Logger;
-import org.jetbrains.annotations.Nullable;
+import jetbrains.buildServer.serverSide.SBuild;
+import jetbrains.buildServer.serverSide.SBuildType;
+import jetbrains.buildServer.vcs.*;
 import org.jetbrains.annotations.NotNull;
+
+import java.util.*;
 
 /**
  * @author Yegor.Yarko
@@ -36,39 +33,49 @@ public class DataUtil {
 
   VcsModificationHistory vcsModificationHistory;
 
-  @Nullable
-  SVcsModification getLastModification(SBuild build) {
-    Long modificationId = build.getBuildPromotion().getLastModificationId();
-    if (modificationId == null || modificationId == -1) {
-      return null;
-    }
-    return vcsModificationHistory.findChangeById(modificationId);
-  }
-
   @NotNull
-  Map<SVcsRoot, SVcsModification> getLastModificationsRevisions(SBuild build) {
-    final List<VcsRootInstanceEntry> rootEntries = build.getVcsRootEntries();
+  Map<SVcsRoot, SVcsModification> getLastModificationsRevisions(@NotNull SBuild build, boolean emulationMode) {
     final Map<SVcsRoot, SVcsModification> rootVersions = new HashMap<SVcsRoot, SVcsModification>();
 
-    List<SVcsModification> modifications = vcsModificationHistory.getAllModifications(build.getBuildType());
-    int toFill = rootEntries.size();
-    SVcsModification lastModification = getLastModification(build);
-    if (lastModification != null) {
-      LOG.debug("Searching for last included revisions. Root entries number: " + toFill + ",  last modification: " + lastModification +
-                ", total modifications: " + modifications.size());
-      for (SVcsModification modification : modifications) {
-        if (modification.compareTo(lastModification) <= 0) {
-          if (rootVersions.get(modification.getVcsRoot()) == null) {
-            rootVersions.put(modification.getVcsRoot(), modification);
-            --toFill;
-          }
-          if (toFill == 0) {
-            break;
-          }
-        }
+    final SBuildType buildType = build.getBuildType();
+    if (buildType == null) return rootVersions;
+
+    List<SVcsModification> modifications = build.getChanges(SelectPrevBuildPolicy.SINCE_FIRST_BUILD, true);
+    if (modifications.isEmpty()) return rootVersions;
+
+    final Set<SVcsRoot> parentRoots = new HashSet<SVcsRoot>();
+    final Set<Long> parentRootIds = new HashSet<Long>();
+    int expectedRevisionsNum = 0;
+
+    if (!emulationMode) {
+      for (VcsRootInstanceEntry re: build.getVcsRootEntries()) {
+        final SVcsRoot parent = re.getVcsRoot().getParent();
+        parentRoots.add(parent);
+        parentRootIds.add(parent.getId());
       }
     } else {
-      LOG.debug("No modification is associated with the build " + build + ", no VCS versions found");
+      for (SVcsRoot root: buildType.getVcsRoots()) {
+        parentRoots.add(root);
+        parentRootIds.add(root.getId());
+      }
+    }
+
+    if (LOG.isDebugEnabled()) {
+      LOG.debug("Searching for last included revisions. Root entries number: " + expectedRevisionsNum + ", total modifications: " + modifications.size());
+    }
+
+    for (SVcsModification modification : modifications) {
+      if (parentRootIds.contains(modification.getVcsRoot().getParentId())) {
+        rootVersions.put(modification.getVcsRoot().getParent(), modification);
+        expectedRevisionsNum--;
+      }
+
+      if (expectedRevisionsNum == 0) break;
+    }
+
+    for (SVcsRoot parent: parentRoots) {
+      if (rootVersions.containsKey(parent)) continue;
+      rootVersions.put(parent, null);
     }
 
     return rootVersions;
