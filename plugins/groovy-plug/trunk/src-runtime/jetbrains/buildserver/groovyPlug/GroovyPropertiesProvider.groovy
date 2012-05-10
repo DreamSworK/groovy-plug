@@ -17,16 +17,16 @@ package jetbrains.buildserver.groovyPlug;
 
 
 import com.intellij.openapi.diagnostic.Logger
-import java.text.SimpleDateFormat
 import jetbrains.buildServer.serverSide.SBuild
 import jetbrains.buildServer.serverSide.SBuildType
 import jetbrains.buildServer.serverSide.parameters.AbstractBuildParametersProvider
 import jetbrains.buildServer.util.StringUtil
 import jetbrains.buildServer.vcs.SVcsModification
 import jetbrains.buildServer.vcs.SVcsRoot
-import jetbrains.buildServer.vcs.VcsRootEntry
 import org.jetbrains.annotations.NotNull
 import org.jetbrains.annotations.Nullable
+
+import java.text.SimpleDateFormat
 
 /**
  * @author Yegor.Yarko
@@ -50,7 +50,7 @@ public class GroovyPropertiesProvider extends AbstractBuildParametersProvider {
       addBuildStartTime(parameters, build);
       addRunParameters(parameters, build);
       addTriggeredBy(parameters, build, emulationMode);
-      addLastModificationsRevisions(parameters, build);
+      addLastModificationsRevisions(parameters, build, emulationMode);
     } catch (Exception e) {
       LOG.error("Critical error occurred during parameters calculation", e);
     }
@@ -82,19 +82,15 @@ public class GroovyPropertiesProvider extends AbstractBuildParametersProvider {
     parameters.addConfiguration("build.triggeredBy", build.getTriggeredBy().getAsString());
   }
 
-  void addLastModificationsRevisions(@NotNull final BuildParameters parameters, SBuild build) {
-    final Map<SVcsRoot, SVcsModification> rootVersions = dataProvider.getLastModificationsRevisions(build);
+  void addLastModificationsRevisions(@NotNull final BuildParameters parameters, @NotNull SBuild build, boolean emulationMode) {
+    final Map<SVcsRoot, SVcsModification> rootVersions = dataProvider.getLastModificationsRevisions(build, emulationMode);
 
-    for (VcsRootEntry rootEntry: build.getVcsRootEntries()){
-      SVcsRoot root = (SVcsRoot)rootEntry.getVcsRoot()
-      addModificationParams(parameters, root, rootVersions.get(root));
+    for (Map.Entry<SVcsRoot, SVcsModification> e: rootVersions.entrySet()) {
+      addModificationParams(parameters, e.key, e.value);
     }
-    if (build.getVcsRootEntries().size() == 1) {
-      if (rootVersions.size() == 1) {
-        addModificationParams(parameters, null, rootVersions.entrySet().iterator().next().getValue());
-      }else{
-        addModificationParams(parameters, null, null);
-      }
+
+    if (rootVersions.size() == 1) {
+      addModificationParams(parameters, null, rootVersions.entrySet().iterator().next().getValue());
     }
   }
 
