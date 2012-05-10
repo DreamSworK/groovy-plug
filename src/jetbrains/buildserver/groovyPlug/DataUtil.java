@@ -65,8 +65,9 @@ public class DataUtil {
     }
 
     for (SVcsModification modification : modifications) {
-      if (parentRootIds.contains(modification.getVcsRoot().getParentId())) {
-        rootVersions.put(modification.getVcsRoot().getParent(), modification);
+      final SVcsRoot parentRoot = modification.getVcsRoot().getParent();
+      if (parentRootIds.contains(parentRoot.getId()) && !rootVersions.containsKey(parentRoot)) {
+        rootVersions.put(parentRoot, modification);
         expectedRevisionsNum--;
       }
 
