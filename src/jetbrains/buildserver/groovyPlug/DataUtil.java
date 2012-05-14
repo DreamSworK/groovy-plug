@@ -65,6 +65,7 @@ public class DataUtil {
     }
 
     for (SVcsModification modification : modifications) {
+      if (modification.isPersonal()) continue;
       final SVcsRoot parentRoot = modification.getVcsRoot().getParent();
       if (parentRootIds.contains(parentRoot.getId()) && !rootVersions.containsKey(parentRoot)) {
         rootVersions.put(parentRoot, modification);
