@@ -116,6 +116,8 @@ public class LocksUtil {
   private static final Logger LOG = Logger.getInstance(LocksUtil.class.getName());
 
   static boolean available(Collection<Lock> locksToTake, Collection<BuildPromotionInfo> buildPromotionInfos) {
+    if (locksToTake.isEmpty()) return true; // always return true if there are no locks to take
+
     LockManager locksManager = new LockManager();
     for (BuildPromotionInfo buildPromotionInfo: buildPromotionInfos) {
       locksManager.lock(getBuildLocks(buildPromotionInfo), buildPromotionInfo);
