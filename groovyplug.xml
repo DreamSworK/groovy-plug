@@ -7,15 +7,6 @@
   <!-- 
   <property name="skip.tests" value="true"/>
    -->
-  <property name="javac2.home" value="${idea.home}/lib"/>
-  <path id="javac2.classpath">
-    <pathelement location="${javac2.home}/javac2.jar"/>
-    <pathelement location="${javac2.home}/jdom.jar"/>
-    <pathelement location="${javac2.home}/asm.jar"/>
-    <pathelement location="${javac2.home}/asm-commons.jar"/>
-  </path>
-  <taskdef name="javac2" classname="com.intellij.ant.Javac2" classpathref="javac2.classpath"/>
-  <taskdef name="instrumentIdeaExtensions" classname="com.intellij.ant.InstrumentIdeaExtensions" classpathref="javac2.classpath"/>
   
   <!-- Compiler options -->
   
@@ -24,16 +15,10 @@
   <property name="compiler.args" value=""/>
   <property name="compiler.max.memory" value="128m"/>
   <patternset id="ignored.files">
-    <exclude name="**/CVS/**"/>
     <exclude name="**/SCCS/**"/>
     <exclude name="**/RCS/**"/>
-    <exclude name="**/rcs/**"/>
     <exclude name="**/.DS_Store/**"/>
     <exclude name="**/.svn/**"/>
-    <exclude name="**/.sbas/**"/>
-    <exclude name="**/.IJI.*/**"/>
-    <exclude name="**/vssver.scc/**"/>
-    <exclude name="**/vssver2.scc/**"/>
     <exclude name="**/.pyc/**"/>
     <exclude name="**/.pyo/**"/>
     <exclude name="**/*.pyc/**"/>
@@ -41,13 +26,24 @@
     <exclude name="**/.git/**"/>
     <exclude name="**/*.hprof/**"/>
     <exclude name="**/_svn/**"/>
+    <exclude name="**/.hg/**"/>
+    <exclude name="**/.sbas/**"/>
+    <exclude name="**/.IJI.*/**"/>
+    <exclude name="**/*.lib/**"/>
+    <exclude name="**/*~/**"/>
+    <exclude name="**/*.orig/**"/>
+    <exclude name="**/__pycache__/**"/>
+    <exclude name="**/.bundle/**"/>
+    <exclude name="**/*.rbc/**"/>
   </patternset>
   <patternset id="library.patterns">
-    <include name="*.zip"/>
     <include name="*.war"/>
-    <include name="*.egg"/>
     <include name="*.ear"/>
+    <include name="*.apk"/>
+    <include name="*.zip"/>
     <include name="*.swc"/>
+    <include name="*.ane"/>
+    <include name="*.egg"/>
     <include name="*.jar"/>
   </patternset>
   <patternset id="compiler.resources">
@@ -76,7 +72,7 @@
   
   <path id="library.teamcity_open_api_common.classpath">
     <pathelement location="${path.variable.teamcitydistribution}/devPackage/common-api.jar"/>
-    <pathelement location="${path.variable.teamcitydistribution}/devPackage/runtime-util.jar"/>
+    <pathelement location="${path.variable.teamcitydistribution}/devPackage/runtime/runtime-util.jar"/>
   </path>
   
   <path id="library.teamcity_open_api_server.classpath">
@@ -85,18 +81,22 @@
   
   <path id="library.teamcity_third-party.classpath">
     <pathelement location="${path.variable.teamcitydistribution}/webapps/ROOT/WEB-INF/lib/annotations.jar"/>
+    <pathelement location="${path.variable.teamcitydistribution}/webapps/ROOT/WEB-INF/lib/jdom.jar"/>
     <pathelement location="${path.variable.teamcitydistribution}/webapps/ROOT/WEB-INF/lib/openapi.jar"/>
-    <pathelement location="${path.variable.teamcitydistribution}/webapps/ROOT/WEB-INF/lib/spring-webmvc.jar"/>
     <pathelement location="${path.variable.teamcitydistribution}/webapps/ROOT/WEB-INF/lib/spring.jar"/>
     <pathelement location="${path.variable.teamcitydistribution}/webapps/ROOT/WEB-INF/lib/util.jar"/>
   </path>
   
   
-  <!-- Application Server Libraries -->
+  <!-- Global Libraries -->
   
-  <!-- Custom Compiler Taskdefs -->
-  <property name="grooovyc.task.sdk" value="library.groovy.classpath"/>
-  <taskdef name="groovyc" classname="org.codehaus.groovy.ant.Groovyc" classpathref="${grooovyc.task.sdk}"/>
+  
+  <!-- Application Server Libraries -->
+  <!-- Register Custom Compiler Taskdefs -->
+  <target name="register.custom.compilers">
+    <property name="grooovyc.task.sdk" value="library.groovy.classpath"/>
+    <taskdef name="groovyc" classname="org.codehaus.groovy.ant.Groovyc" classpathref="${grooovyc.task.sdk}"/>
+  </target>
   
   <!-- Modules -->
   
@@ -116,8 +116,24 @@
     <!-- Paths to be included in compilation bootclasspath -->
   </path>
   
+  <path id="groovyplug.module.production.classpath">
+    <path refid="library.groovy.classpath"/>
+    <path refid="library.teamcity_open_api_server.classpath"/>
+    <path refid="library.teamcity_open_api_common.classpath"/>
+    <path refid="library.teamcity_third-party.classpath"/>
+  </path>
+  
+  <path id="groovyplug.runtime.production.module.classpath">
+    <path refid="library.groovy.classpath"/>
+    <pathelement location="${groovyplug.output.dir}"/>
+    <path refid="library.teamcity_open_api_server.classpath"/>
+    <path refid="library.teamcity_open_api_common.classpath"/>
+    <path refid="library.teamcity_third-party.classpath"/>
+  </path>
+  
   <path id="groovyplug.module.classpath">
     <path refid="library.groovy.classpath"/>
+    <pathelement location="${groovyplug.output.dir}"/>
     <path refid="library.teamcity_open_api_server.classpath"/>
     <path refid="library.teamcity_open_api_common.classpath"/>
     <path refid="library.teamcity_third-party.classpath"/>
@@ -125,8 +141,8 @@
   
   <path id="groovyplug.runtime.module.classpath">
     <path refid="library.groovy.classpath"/>
-    <pathelement location="${groovyplug.output.dir}"/>
     <pathelement location="${groovyplug.testoutput.dir}"/>
+    <pathelement location="${groovyplug.output.dir}"/>
     <path refid="library.teamcity_open_api_server.classpath"/>
     <path refid="library.teamcity_open_api_common.classpath"/>
     <path refid="library.teamcity_third-party.classpath"/>
@@ -151,23 +167,16 @@
   
   <target name="compile.module.groovyplug" depends="compile.module.groovyplug.production,compile.module.groovyplug.tests" description="Compile module GroovyPlug"/>
   
-  <target name="compile.module.groovyplug.production" description="Compile module GroovyPlug; production classes">
+  <target name="compile.module.groovyplug.production" depends="register.custom.compilers" description="Compile module GroovyPlug; production classes">
     <mkdir dir="${groovyplug.output.dir}"/>
     <groovyc destdir="${groovyplug.output.dir}" fork="yes">
       <src refid="groovyplug.module.sourcepath"/>
-      <classpath refid="groovyplug.module.classpath"/>
+      <classpath refid="groovyplug.module.production.classpath"/>
       <patternset refid="excluded.from.compilation.groovyplug"/>
       <javac debug="${compiler.debug}">
         <compilerarg line="${compiler.args.groovyplug}"/>
       </javac>
     </groovyc>
-    <instrumentIdeaExtensions destdir="${groovyplug.output.dir}">
-      <compilerarg line="${compiler.args.groovyplug}"/>
-      <bootclasspath refid="groovyplug.module.bootclasspath"/>
-      <classpath refid="groovyplug.module.classpath"/>
-      <src refid="groovyplug.module.sourcepath"/>
-      <patternset refid="excluded.from.compilation.groovyplug"/>
-    </instrumentIdeaExtensions>
     
     <copy todir="${groovyplug.output.dir}">
       <fileset dir="${module.groovyplug.basedir}/src">
@@ -181,7 +190,7 @@
     </copy>
   </target>
   
-  <target name="compile.module.groovyplug.tests" depends="compile.module.groovyplug.production" description="compile module GroovyPlug; test classes" unless="skip.tests"/>
+  <target name="compile.module.groovyplug.tests" depends="register.custom.compilers,compile.module.groovyplug.production" description="compile module GroovyPlug; test classes" unless="skip.tests"/>
   
   <target name="clean.module.groovyplug" description="cleanup module">
     <delete dir="${groovyplug.output.dir}"/>
@@ -194,16 +203,7 @@
   
   <target name="clean" depends="clean.module.groovyplug" description="cleanup all"/>
   
-  <target name="init.artifacts">
-    <property name="artifacts.temp.dir" value="${basedir}/artifactsTemp"/>
-    <mkdir dir="${artifacts.temp.dir}"/>
-  </target>
+  <target name="build.modules" depends="init, clean, compile.module.groovyplug" description="build all modules"/>
   
-  <target name="build.all.artifacts" description="Build all artifacts">
-    
-    <!-- Delete temporary files -->
-    <delete dir="${artifacts.temp.dir}"/>
-  </target>
-  
-  <target name="all" depends="init, clean, compile.module.groovyplug, build.all.artifacts" description="build all"/>
+  <target name="all" depends="build.modules" description="build all"/>
 </project>
