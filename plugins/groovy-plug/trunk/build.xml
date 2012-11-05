@@ -1,6 +1,7 @@
 <project name="groovyplug-custom-build" default="dist" basedir=".">
 
   <property file="build.properties"/>
+  <property name="build.number" value="SNAPSHOT"/>
   <property name="plugin.name" value="groovyPlug"/>
 
   <property name="javac2.home" value="${basedir}/lib-compile"/>
@@ -9,7 +10,7 @@
   <import file="teamcity-common.xml"/>
 
   <target name="package">
-    <package.teamcity.plugin name="${plugin.name}" server.output="${groovyplug.output.dir}"/>
+    <package.teamcity.plugin name="${plugin.name}" server.output="${groovyplug.output.dir}" plugin.version="${build.number}"/>
     <!-- Groovy specific -->
     <delete dir="dist/application_libs" quiet="true"/>
     <copy todir="dist/application_libs">

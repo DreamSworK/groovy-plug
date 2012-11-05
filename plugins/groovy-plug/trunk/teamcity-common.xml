@@ -30,7 +30,7 @@
 
     <attribute name="server.lib.dir" default="" description="directory to get libs for the server part"/>
     <attribute name="server.lib.includes" default="none should match" description="includes pattern of the files in the directory"/>
-    <attribute name="plugin.version" default="SNAPSHOT" description="the version of the plugin to put into teamcity-plugin.xml instead of '@version@'"/>
+    <attribute name="plugin.version" default="SNAPSHOT" description="the version of the plugin to put into teamcity-plugin.xml instead of '@Plugin_Version@'"/>
 
     <element name="additional-files" optional="yes" description="fileset of the files to pack into root of the plugin"/>
 
@@ -249,9 +249,9 @@
     <echo message="Copying plugin descriptor file '${source}' to '${dest}'." />
     <copy file="${source}" tofile="${dest}" failonerror="false"/>
 
-    <echo message="Replacing '@version@' on '${plugin.version}' in the copied plugin descriptor file." />
+    <echo message="Replacing '@Plugin_Version@' on '${plugin.version}' in the copied plugin descriptor file." />
     <replace file="${dest}" value="${plugin.version}">
-      <replacetoken><![CDATA[@version@]]></replacetoken>
+      <replacetoken><![CDATA[@Plugin_Version@]]></replacetoken>
     </replace>
     </target>
 
