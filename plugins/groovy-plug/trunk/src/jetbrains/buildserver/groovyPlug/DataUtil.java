@@ -34,7 +34,7 @@ public class DataUtil {
   VcsModificationHistory vcsModificationHistory;
 
   @NotNull
-  Map<SVcsRoot, SVcsModification> getLastModificationsRevisions(@NotNull SBuild build, boolean emulationMode) {
+  Map<SVcsRoot, SVcsModification> getLastModificationsRevisions(@NotNull SBuild build) {
     final Map<SVcsRoot, SVcsModification> rootVersions = new HashMap<SVcsRoot, SVcsModification>();
 
     final SBuildType buildType = build.getBuildType();
@@ -47,17 +47,10 @@ public class DataUtil {
     final Set<Long> parentRootIds = new HashSet<Long>();
     int expectedRevisionsNum = 0;
 
-    if (!emulationMode) {
-      for (VcsRootInstanceEntry re: build.getVcsRootEntries()) {
-        final SVcsRoot parent = re.getVcsRoot().getParent();
-        parentRoots.add(parent);
-        parentRootIds.add(parent.getId());
-      }
-    } else {
-      for (SVcsRoot root: buildType.getVcsRoots()) {
-        parentRoots.add(root);
-        parentRootIds.add(root.getId());
-      }
+    for (VcsRootInstanceEntry re: build.getVcsRootEntries()) {
+      final SVcsRoot parent = re.getVcsRoot().getParent();
+      parentRoots.add(parent);
+      parentRootIds.add(parent.getId());
     }
 
     if (LOG.isDebugEnabled()) {

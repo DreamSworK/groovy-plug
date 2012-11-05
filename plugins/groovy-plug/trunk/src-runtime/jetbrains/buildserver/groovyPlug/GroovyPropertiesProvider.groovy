@@ -17,6 +17,7 @@ package jetbrains.buildserver.groovyPlug;
 
 
 import com.intellij.openapi.diagnostic.Logger
+import com.intellij.openapi.vcs.VcsRoot
 import jetbrains.buildServer.serverSide.SBuild
 import jetbrains.buildServer.serverSide.SBuildType
 import jetbrains.buildServer.serverSide.parameters.AbstractBuildParametersProvider
@@ -83,35 +84,46 @@ public class GroovyPropertiesProvider extends AbstractBuildParametersProvider {
   }
 
   void addLastModificationsRevisions(@NotNull final BuildParameters parameters, @NotNull SBuild build, boolean emulationMode) {
-    final Map<SVcsRoot, SVcsModification> rootVersions = dataProvider.getLastModificationsRevisions(build, emulationMode);
+    Map<SVcsRoot, SVcsModification> rootVersions = new HashMap<SVcsRoot, SVcsModification>()
+    if (emulationMode) {
+      final SBuildType buildType = build.getBuildType();
+      if (buildType == null) return;
+
+      for (VcsRoot root: buildType.getVcsRoots()) {
+        rootVersions.put(root as SVcsRoot, null);
+      }
+    } else {
+      rootVersions = dataProvider.getLastModificationsRevisions(build);
+    }
 
     for (Map.Entry<SVcsRoot, SVcsModification> e: rootVersions.entrySet()) {
-      addModificationParams(parameters, e.key, e.value);
+      addModificationParams(parameters, e.key, e.value, emulationMode ? "???" : "");
     }
 
     if (rootVersions.size() == 1) {
-      addModificationParams(parameters, null, rootVersions.entrySet().iterator().next().getValue());
+      addModificationParams(parameters, null, rootVersions.entrySet().iterator().next().getValue(), emulationMode ? "???" : "");
     }
   }
 
-  private def addModificationParams(BuildParameters parameters, @Nullable SVcsRoot root, @Nullable SVcsModification modification) {
+  private def addModificationParams(BuildParameters parameters, @Nullable SVcsRoot root, @Nullable SVcsModification modification, @NotNull String valueIfModAbsent) {
     String suffix = root == null ? "" : "." + StringUtil.replaceNonAlphaNumericChars(root.getName(), (char) '_');
-    parameters.addEnvAndSystem("build.vcs.lastIncluded.revision" + suffix, getVersion(modification));
-    parameters.addEnvAndSystem("build.vcs.lastIncluded.timestamp" + suffix, getDate(modification))
+    parameters.addEnvAndSystem("build.vcs.lastIncluded.revision" + suffix, getVersion(modification, valueIfModAbsent));
+    parameters.addEnvAndSystem("build.vcs.lastIncluded.timestamp" + suffix, getDate(modification, valueIfModAbsent))
   }
 
-  private @NotNull String getDate(@Nullable SVcsModification modification) {
+  private @NotNull String getDate(@Nullable SVcsModification modification, @NotNull String valueIfModAbsent) {
     if (modification != null) {
       return (new SimpleDateFormat("yyyyMMdd'T'HHmmssZ")).format(modification.getVcsDate())
-    }else{
-      "";
     }
+
+    return valueIfModAbsent;
   }
 
-  private @NotNull  String getVersion(@Nullable SVcsModification modification) {
+  private @NotNull  String getVersion(@Nullable SVcsModification modification, @NotNull String valueIfModAbsent) {
     if (modification == null){
-      return "";
+      return valueIfModAbsent;
     }
+
     String version = modification.getDisplayVersion()
     if (version == null) {
       version = modification.getVersion();
