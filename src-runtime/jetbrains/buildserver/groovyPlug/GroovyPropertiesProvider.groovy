@@ -17,13 +17,13 @@ package jetbrains.buildserver.groovyPlug;
 
 
 import com.intellij.openapi.diagnostic.Logger
-import com.intellij.openapi.vcs.VcsRoot
 import jetbrains.buildServer.serverSide.SBuild
 import jetbrains.buildServer.serverSide.SBuildType
 import jetbrains.buildServer.serverSide.parameters.AbstractBuildParametersProvider
 import jetbrains.buildServer.util.StringUtil
 import jetbrains.buildServer.vcs.SVcsModification
 import jetbrains.buildServer.vcs.SVcsRoot
+import jetbrains.buildServer.vcs.VcsRoot
 import org.jetbrains.annotations.NotNull
 import org.jetbrains.annotations.Nullable
 
