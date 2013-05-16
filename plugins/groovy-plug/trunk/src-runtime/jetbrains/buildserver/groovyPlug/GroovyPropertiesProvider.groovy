@@ -66,7 +66,7 @@ public class GroovyPropertiesProvider extends AbstractBuildParametersProvider {
 
     List<SBuildRunnerDescriptor> runners = buildType.getBuildRunners();
     if (runners.size() > 0) {
-      for (Map.Entry<String, String> runParameter: runners.get(0).getRunParameters().entrySet()) {
+      for (Map.Entry<String, String> runParameter: runners.get(0).getParameters().entrySet()) {
         parameters.addConfiguration("runParam." + runParameter.getKey(), runParameter.getValue());
       }
     }
