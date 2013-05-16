@@ -18,6 +18,7 @@ package jetbrains.buildserver.groovyPlug;
 
 import com.intellij.openapi.diagnostic.Logger
 import jetbrains.buildServer.serverSide.SBuild
+import jetbrains.buildServer.serverSide.SBuildRunnerDescriptor
 import jetbrains.buildServer.serverSide.SBuildType
 import jetbrains.buildServer.serverSide.parameters.AbstractBuildParametersProvider
 import jetbrains.buildServer.util.StringUtil
@@ -63,8 +64,11 @@ public class GroovyPropertiesProvider extends AbstractBuildParametersProvider {
     SBuildType buildType = build.getBuildType();
     if (buildType == null) return;
 
-    for (Map.Entry<String, String> runParameter: buildType.getRunParameters().entrySet()) {
-      parameters.addConfiguration("runParam." + runParameter.getKey(), runParameter.getValue());
+    List<SBuildRunnerDescriptor> runners = buildType.getBuildRunners();
+    if (runners.size() > 0) {
+      for (Map.Entry<String, String> runParameter: runners.get(0).getRunParameters().entrySet()) {
+        parameters.addConfiguration("runParam." + runParameter.getKey(), runParameter.getValue());
+      }
     }
   }
 
