@@ -11,7 +11,7 @@
 
   <target name="package">
     <package.teamcity.plugin name="${plugin.name}" server.output="${groovyplug.output.dir}" plugin.version="${build.number}"
-                             server.lib.dir="lib"/>
+                             server.lib.dir="lib" server.lib.includes="*.jar"/>
   </target>
 
   <target name="dist" depends="check.teamcitydistribution,all,package"/>
