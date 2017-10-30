@@ -31,7 +31,6 @@ public class GroovyExtensionsInitializer {
   ParametersPreprocessor myPropertyProvider;
   BuildParametersProvider myReferencePropertyProvider;
   BuildServerListener myBuildServerListener;
-  DataCleaner myBuildCleaner;
 
   public GroovyExtensionsInitializer(ServerExtensionHolder extensionHolder, SBuildServer server) {
     this.myExtensionsHolder = extensionHolder;
@@ -50,10 +49,6 @@ public class GroovyExtensionsInitializer {
     this.myBuildServerListener = buildServerListeneruildServerListener;
   }
 
-  public void setBuildCleaner(DataCleaner buildCleaner) {
-    myBuildCleaner = buildCleaner;
-  }
-
   public void init() {
     if (myPropertyProvider != null) {
       myExtensionsHolder.registerExtension(ParametersPreprocessor.class, "myPropertyProvider", myPropertyProvider);
@@ -63,6 +58,5 @@ public class GroovyExtensionsInitializer {
         .registerExtension(BuildParametersProvider.class, "myReferencePropertyProvider", myReferencePropertyProvider);
     }
     if (myBuildServerListener != null) myServer.addListener(myBuildServerListener);
-    if (myBuildCleaner != null) myServer.registerExtension(DataCleaner.class, "groovyBuildCleaner", myBuildCleaner);
   }
 }
